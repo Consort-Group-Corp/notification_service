@@ -44,7 +44,6 @@ public class KafkaConsumerConfig {
     @Value("${kafka.max-poll-interval-ms}")
     private String maxPollIntervalMs;
 
-
     /**
      * Конфигурация ConsumerFactory для KafkaDto
      */
