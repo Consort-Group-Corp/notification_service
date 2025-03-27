@@ -19,7 +19,6 @@ public class MailConfig {
     @Value("${mail.username}")
     private String login;
 
-
     @Bean
     public JavaMailSender mailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
