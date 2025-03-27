@@ -24,6 +24,11 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
+logging:
+  level:
+    root: INFO
+    org.springframework: DEBUG
+
 kafka:
   bootstrap-servers: localhost:9092
   consumer-group-id: email-group
