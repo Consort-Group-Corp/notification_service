@@ -42,11 +42,11 @@ mail:
   host: smtp.gmail.com
   port: 587
   username: doniyor.kurbanov.21@gmail.com
-  password: sjqb zmfg vwfk gybu
+  password: eeqm amxf ejqc dahi
   properties:
     mail:
       smtp:
         auth: true
         starttls:
           enable: true
-  subjectForEmail: "Registration"
+  subjectForEmail: "Registration code"
