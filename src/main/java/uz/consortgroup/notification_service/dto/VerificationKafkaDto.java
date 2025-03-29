@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uz.consortgroup.notification_service.event.EventType;
 
 @AllArgsConstructor
 @NoArgsConstructor
