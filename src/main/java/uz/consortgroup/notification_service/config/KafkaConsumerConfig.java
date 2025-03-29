@@ -79,6 +79,9 @@ public class KafkaConsumerConfig {
         return factory;
     }
 
+    /**
+     * Обработчик ошибок Kafka
+     */
     private CommonErrorHandler errorHandler() {
         DefaultErrorHandler handler = new DefaultErrorHandler(new FixedBackOff(1000, 3));
         handler.addNotRetryableExceptions(IllegalStateException.class);
