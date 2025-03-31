@@ -13,6 +13,7 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.CommonErrorHandler;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.support.serializer.DeserializationException;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.util.backoff.FixedBackOff;
@@ -48,12 +49,22 @@ public class KafkaConsumerConfig {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
-        props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class.getName());
-        props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
-        props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
-        props.put(JsonDeserializer.VALUE_DEFAULT_TYPE,"uz.consortgroup.notification_service.dto.VerificationKafkaDto");
+        props.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
+        props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
+
+        // Доверенные пакеты
+        props.put(JsonDeserializer.TRUSTED_PACKAGES, "uz.consortgroup.notification_service.event");
+
+        // Включаем заголовки с типом, раз они передаются продюсером
+        props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, true);
+
+        // Указываем маппинг типов
+        props.put(JsonDeserializer.TYPE_MAPPINGS,
+                "user_registration:uz.consortgroup.notification_service.event.UserRegistrationEvent," +
+                        "verification_code_resent:uz.consortgroup.notification_service.event.VerificationCodeResentEvent");
+        // Настройки производительности
         props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, sessionTimeoutMs);
         props.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, maxPartitionFetchBytes);
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPollRecords);
@@ -66,29 +77,54 @@ public class KafkaConsumerConfig {
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, Object> universalKafkaListenerContainerFactory(
-            ConsumerFactory<String, Object> consumerFactory) {
+            @Qualifier("universalConsumerFactory") ConsumerFactory<String, Object> consumerFactory) {
 
         ConcurrentKafkaListenerContainerFactory<String, Object> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);
         factory.setConcurrency(3);
-        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
-        factory.getContainerProperties().setPollTimeout(5000);
-        factory.setCommonErrorHandler(errorHandler());
+
+        ContainerProperties containerProps = factory.getContainerProperties();
+        containerProps.setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+        containerProps.setPollTimeout(5000);
+        containerProps.setMissingTopicsFatal(false);
+
+        // Фильтрация проблемных сообщений
+        factory.setRecordFilterStrategy(record -> {
+            if (record.value() == null) {
+                log.warn("Received null value in topic {}", record.topic());
+                return true;
+            }
+            return false;
+        });
+
+        // Универсальный обработчик ошибок
+        factory.setCommonErrorHandler(kafkaErrorHandler());
+
         return factory;
     }
 
-    /**
-     * Обработчик ошибок Kafka
-     */
-    private CommonErrorHandler errorHandler() {
-        DefaultErrorHandler handler = new DefaultErrorHandler(new FixedBackOff(1000, 3));
-        handler.addNotRetryableExceptions(IllegalStateException.class);
-        handler.setRetryListeners((record, ex, deliveryAttempt) ->
-                log.error("Error processing message offset={} (attempt={}): {}",
-                        record.offset(), deliveryAttempt, ex.getMessage())
+    @Bean
+    public DefaultErrorHandler kafkaErrorHandler() {
+        DefaultErrorHandler handler = new DefaultErrorHandler(
+                (record, exception) -> {
+                    log.error("Failed to process message from topic {}: {}",
+                            record.topic(), exception.getMessage());
+                },
+                new FixedBackOff(1000, 3)
         );
+
+        handler.addNotRetryableExceptions(
+                NullPointerException.class,
+                IllegalArgumentException.class,
+                DeserializationException.class
+        );
+
+        handler.setRetryListeners((record, ex, deliveryAttempt) ->
+                log.warn("Retrying message (attempt {}): {}", deliveryAttempt, ex.getMessage())
+        );
+
         return handler;
     }
 }
