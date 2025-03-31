@@ -32,35 +32,49 @@ public class EmailService {
     public void sendEmail(UserRegistrationEmailContent userRegistrationEmailContent,
                           ResentVerificationEmailContent resentVerificationEmailContent) {
         try {
-            String emailBody;
-            if (userRegistrationEmailContent != null) {
-                String action = userRegistrationEmailContent.isResend() ? "повторный " : "";
-                emailBody = String.format(EMAIL_GREETING,
-                        userRegistrationEmailContent.getFirstName(),
-                        userRegistrationEmailContent.getMiddleName(),
-                        action,
-                        userRegistrationEmailContent.getVerificationCode());
-            } else {
-                emailBody = String.format(EMAIL_RESEND_MESSAGE, resentVerificationEmailContent.getVerificationCode());
-            }
+            String emailBody = buildEmailBody(userRegistrationEmailContent, resentVerificationEmailContent);
 
-            String logAction = userRegistrationEmailContent != null && userRegistrationEmailContent.isResend() ? "Resending" : "Sending";
+            String logAction = userRegistrationEmailContent
+                    != null && userRegistrationEmailContent.isResend() ? "Resending" : "Sending";
+
             log.info("{} email: {}, to {}", logAction, subjectForEmail,
                     userRegistrationEmailContent != null ? userRegistrationEmailContent.getEmail() : resentVerificationEmailContent.getEmail());
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, false, CHARSET_UTF8);
-            helper.setTo(userRegistrationEmailContent != null ? userRegistrationEmailContent.getEmail() : resentVerificationEmailContent.getEmail());
+            helper.setTo(userRegistrationEmailContent != null ?
+                    userRegistrationEmailContent.getEmail() : resentVerificationEmailContent.getEmail());
             helper.setSubject(subjectForEmail);
             helper.setText(emailBody, false);
 
-            log.info(LOG_EMAIL_PREPARED, userRegistrationEmailContent != null ? userRegistrationEmailContent.getEmail() : resentVerificationEmailContent.getEmail());
+            log.info(LOG_EMAIL_PREPARED, userRegistrationEmailContent != null ?
+                    userRegistrationEmailContent.getEmail() : resentVerificationEmailContent.getEmail());
             mailSender.send(message);
-            log.info(LOG_EMAIL_SENT, userRegistrationEmailContent != null ? userRegistrationEmailContent.getEmail() : resentVerificationEmailContent.getEmail());
+
+            log.info(LOG_EMAIL_SENT, userRegistrationEmailContent != null ?
+                    userRegistrationEmailContent.getEmail() : resentVerificationEmailContent.getEmail());
+
         } catch (MessagingException e) {
-            log.error(LOG_EMAIL_ERROR, userRegistrationEmailContent != null ? userRegistrationEmailContent.getEmail() : resentVerificationEmailContent.getEmail(), e.getMessage(), e);
+            log.error(LOG_EMAIL_ERROR, userRegistrationEmailContent != null ?
+                    userRegistrationEmailContent.getEmail() : resentVerificationEmailContent.getEmail(), e.getMessage(), e);
             throw new RuntimeException("Failed to send email", e);
         }
+    }
+
+    private static String buildEmailBody(UserRegistrationEmailContent userRegistrationEmailContent,
+                                         ResentVerificationEmailContent resentVerificationEmailContent) {
+        String emailBody;
+        if (userRegistrationEmailContent != null) {
+            String action = userRegistrationEmailContent.isResend() ? "повторный " : "";
+            emailBody = String.format(EMAIL_GREETING,
+                    userRegistrationEmailContent.getFirstName(),
+                    userRegistrationEmailContent.getMiddleName(),
+                    action,
+                    userRegistrationEmailContent.getVerificationCode());
+        } else {
+            emailBody = String.format(EMAIL_RESEND_MESSAGE, resentVerificationEmailContent.getVerificationCode());
+        }
+        return emailBody;
     }
 
     public void sendMail(UserRegistrationEvent event) {
