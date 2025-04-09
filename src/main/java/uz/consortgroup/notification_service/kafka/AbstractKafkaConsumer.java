@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 import uz.consortgroup.notification_service.event.EmailContent;
-import uz.consortgroup.notification_service.event.EventType;
+import uz.consortgroup.notification_service.entity.EventType;
 import uz.consortgroup.notification_service.service.EmailDispatcherService;
 
 import java.util.List;
@@ -13,15 +13,10 @@ import java.util.Objects;
 @Slf4j
 @Component
 public abstract class AbstractKafkaConsumer<T extends EmailContent> {
-
     private final EmailDispatcherService emailDispatcherService;
 
-    private final EventType eventType;
-
-    protected AbstractKafkaConsumer(EmailDispatcherService emailDispatcherService,
-                                    EventType eventType) {
+    protected AbstractKafkaConsumer(EmailDispatcherService emailDispatcherService) {
         this.emailDispatcherService = emailDispatcherService;
-        this.eventType = eventType;
     }
 
     protected void processBatch(List<T> messages, Acknowledgment ack) {
@@ -31,7 +26,7 @@ public abstract class AbstractKafkaConsumer<T extends EmailContent> {
                     try {
                         emailDispatcherService.dispatch(
                                 message,
-                                eventType,
+                                getEventType(),
                                 message.getLocale()
                         );
                     } catch (Exception e) {
@@ -42,4 +37,5 @@ public abstract class AbstractKafkaConsumer<T extends EmailContent> {
     }
 
     protected abstract Long getMessageId(T message);
+    protected abstract EventType getEventType();
 }

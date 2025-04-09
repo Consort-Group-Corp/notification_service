@@ -6,7 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uz.consortgroup.notification_service.entity.Communication;
+import uz.consortgroup.notification_service.entity.EventType;
+import uz.consortgroup.notification_service.entity.Language;
 
+import java.time.LocalDate;
 import java.util.Locale;
 
 @AllArgsConstructor
@@ -16,27 +20,27 @@ import java.util.Locale;
 public class UserRegistrationEvent implements PersonalizableEmailContent {
     @JsonProperty("messageId")
     private Long messageId;
+    @JsonProperty("language")
+    private Language language;
     private Long userId;
     private String lastName;
     private String firstName;
     private String middleName;
     private String email;
-    @JsonProperty("language")
-    private Language language;
+    private String phoneNumber;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    private LocalDate bornDate;
     private String verificationCode;
-
     private Locale locale;
-
-    public Locale getLocale() {
-        if (locale == null && language != null) {
-            this.locale = new Locale(language.getCode());
-        }
-
-        return locale != null ? locale : Locale.ENGLISH;
-    }
-
+    @JsonProperty("communication")
+    private Communication communication;
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private EventType eventType;
+
+    @Override
+    public Locale getLocale() {
+        return resolveLocale(language, locale);
+    }
 
     @Override
     public String getEmail() {

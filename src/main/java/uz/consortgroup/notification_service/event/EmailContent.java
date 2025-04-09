@@ -1,10 +1,7 @@
 package uz.consortgroup.notification_service.event;
 
-import java.util.Locale;
-
-public interface EmailContent {
+public interface EmailContent extends Content {
     Long getMessageId();
     String getEmail();
     String getVerificationCode();
-    Locale getLocale();
 }

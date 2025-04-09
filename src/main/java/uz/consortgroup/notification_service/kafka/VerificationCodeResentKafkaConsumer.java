@@ -5,7 +5,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-import uz.consortgroup.notification_service.event.EventType;
+import uz.consortgroup.notification_service.entity.EventType;
 import uz.consortgroup.notification_service.event.VerificationCodeResentEvent;
 import uz.consortgroup.notification_service.service.EmailDispatcherService;
 
@@ -16,7 +16,7 @@ import java.util.List;
 public class VerificationCodeResentKafkaConsumer extends AbstractKafkaConsumer<VerificationCodeResentEvent> {
 
     public VerificationCodeResentKafkaConsumer(EmailDispatcherService dispatcherService) {
-        super(dispatcherService, EventType.VERIFICATION_CODE_SENT);
+        super(dispatcherService);
     }
 
     @KafkaListener(
@@ -35,5 +35,10 @@ public class VerificationCodeResentKafkaConsumer extends AbstractKafkaConsumer<V
     @Override
     protected Long getMessageId(VerificationCodeResentEvent message) {
         return message.getMessageId();
+    }
+
+    @Override
+    protected EventType getEventType() {
+        return EventType.VERIFICATION_CODE_SENT;
     }
 }

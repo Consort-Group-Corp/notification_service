@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uz.consortgroup.notification_service.entity.EventType;
+import uz.consortgroup.notification_service.entity.Language;
 
 import java.util.Locale;
 
@@ -13,25 +15,20 @@ import java.util.Locale;
 @NoArgsConstructor
 @Data
 @Builder
-public class VerificationCodeResentEvent implements ResentVerificationEmailContent {
+public class VerificationCodeResentEvent implements EmailContent {
     private Long messageId;
     private Long userId;
     private String email;
+    private String newVerificationCode;
     @JsonProperty("language")
     private Language language;
-    private String newVerificationCode;
-
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private EventType eventType;
-
     private Locale locale;
 
+    @Override
     public Locale getLocale() {
-        if (locale == null && language != null) {
-            this.locale = new Locale(language.getCode());
-        }
-
-        return locale != null ? locale : Locale.ENGLISH;
+        return resolveLocale(language, locale);
     }
 
     @Override
@@ -45,12 +42,7 @@ public class VerificationCodeResentEvent implements ResentVerificationEmailConte
     }
 
     @Override
-    public String getFirstName() {
-        return "";
-    }
-
-    @Override
-    public String getMiddleName() {
-        return "";
+    public Long getMessageId() {
+        return messageId;
     }
 }
