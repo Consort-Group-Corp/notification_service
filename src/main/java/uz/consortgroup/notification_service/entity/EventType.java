@@ -1,4 +1,4 @@
-package uz.consortgroup.notification_service.event;
+package uz.consortgroup.notification_service.entity;
 
 public enum EventType {
     USER_REGISTERED,

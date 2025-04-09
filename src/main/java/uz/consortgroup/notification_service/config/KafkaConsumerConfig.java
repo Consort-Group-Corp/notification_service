@@ -54,17 +54,13 @@ public class KafkaConsumerConfig {
         props.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
         props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
 
-        // Доверенные пакеты
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "uz.consortgroup.notification_service.event");
 
-        // Включаем заголовки с типом, раз они передаются продюсером
         props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, true);
 
-        // Указываем маппинг типов
         props.put(JsonDeserializer.TYPE_MAPPINGS,
                 "user_registration:uz.consortgroup.notification_service.event.UserRegistrationEvent," +
                         "verification_code_resent:uz.consortgroup.notification_service.event.VerificationCodeResentEvent");
-        // Настройки производительности
         props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, sessionTimeoutMs);
         props.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, maxPartitionFetchBytes);
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPollRecords);
@@ -90,7 +86,6 @@ public class KafkaConsumerConfig {
         containerProps.setPollTimeout(5000);
         containerProps.setMissingTopicsFatal(false);
 
-        // Фильтрация проблемных сообщений
         factory.setRecordFilterStrategy(record -> {
             if (record.value() == null) {
                 log.warn("Received null value in topic {}", record.topic());
@@ -99,7 +94,6 @@ public class KafkaConsumerConfig {
             return false;
         });
 
-        // Универсальный обработчик ошибок
         factory.setCommonErrorHandler(kafkaErrorHandler());
 
         return factory;

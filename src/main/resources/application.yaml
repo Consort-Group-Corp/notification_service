@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: user-service
+  messages:
+    encoding: utf-8
 
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -38,6 +40,8 @@ kafka:
   max-poll-interval-ms: 300000
   user-registration: user-registered-topic
   verification-code-resent: verification-code-resent-topic
+
+
 
 mail:
   host: smtp.gmail.com
