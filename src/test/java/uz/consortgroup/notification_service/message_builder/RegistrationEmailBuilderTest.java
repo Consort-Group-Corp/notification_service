@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.MessageSource;
+import uz.consortgroup.notification_service.entity.enumeration.EventType;
 import uz.consortgroup.notification_service.event.EmailContent;
 import uz.consortgroup.notification_service.event.PersonalizableEmailContent;
 
@@ -49,17 +50,22 @@ class RegistrationEmailBuilderTest {
     @Test
     void buildBody_shouldReturnTranslatedBody() {
         PersonalizableEmailContent content = mock(PersonalizableEmailContent.class);
-        when(content.getFirstName()).thenReturn("John");
-        when(content.getMiddleName()).thenReturn("Doe");
         when(content.getVerificationCode()).thenReturn("1234");
 
-        when(messageSource.getMessage(eq("email.registration.body"), eq(new Object[]{"John", "Doe", "1234"}), eq(Locale.ENGLISH)))
-                .thenReturn("Dear John Doe, your verification code is 1234");
+        when(messageSource.getMessage(
+                eq("email.registration.body"),
+                eq(new Object[]{"1234"}),
+                eq(Locale.ENGLISH)
+        )).thenReturn("Your verification code is 1234");
 
         String body = builder.buildBody(content, Locale.ENGLISH);
 
-        assertEquals("Dear John Doe, your verification code is 1234", body);
-        verify(messageSource).getMessage("email.registration.body", new Object[]{"John", "Doe", "1234"}, Locale.ENGLISH);
+        assertEquals("Your verification code is 1234", body);
+        verify(messageSource).getMessage(
+                "email.registration.body",
+                new Object[]{"1234"},
+                Locale.ENGLISH
+        );
     }
 
     @Test
@@ -81,9 +87,10 @@ class RegistrationEmailBuilderTest {
            }
 
            @Override
-           public Locale getLocale() {
-               return Locale.ENGLISH;
+           public EventType getEventType() {
+               return EventType.USER_REGISTERED;
            }
+
        };
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
@@ -109,6 +116,11 @@ class RegistrationEmailBuilderTest {
             @Override
             public String getVerificationCode() {
                 return "1234";
+            }
+
+            @Override
+            public EventType getEventType() {
+                return EventType.USER_REGISTERED;
             }
 
             @Override

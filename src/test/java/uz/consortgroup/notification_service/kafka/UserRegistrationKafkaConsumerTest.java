@@ -6,17 +6,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.support.Acknowledgment;
-import uz.consortgroup.notification_service.entity.EventType;
-import uz.consortgroup.notification_service.event.UserRegistrationEvent;
+import uz.consortgroup.notification_service.event.UserRegisteredEvent;
 import uz.consortgroup.notification_service.service.EmailDispatcherService;
 import uz.consortgroup.notification_service.service.processor.UserRegistrationProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -25,10 +28,8 @@ import static org.mockito.Mockito.verify;
 public class UserRegistrationKafkaConsumerTest {
     @Mock
     private EmailDispatcherService dispatcherService;
-
     @Mock
-    private UserRegistrationProcessor userRegistrationProcessor;
-
+    private UserRegistrationProcessor processor;
     @Mock
     private Acknowledgment ack;
 
@@ -36,56 +37,69 @@ public class UserRegistrationKafkaConsumerTest {
 
     @BeforeEach
     void setUp() {
-        consumer = new UserRegistrationKafkaConsumer(dispatcherService, userRegistrationProcessor);
+        consumer = new UserRegistrationKafkaConsumer(dispatcherService, processor);
     }
 
     @Test
-    void shouldProcessValidUserRegistrationEvents() {
-        UserRegistrationEvent msg1 = new UserRegistrationEvent();
-        UserRegistrationEvent msg2 = new UserRegistrationEvent();
+    void shouldProcessAllMessagesSuccessfully() throws Exception {
+        UserRegisteredEvent msg1 = createTestEvent(1L);
+        UserRegisteredEvent msg2 = createTestEvent(2L);
+        List<UserRegisteredEvent> messages = List.of(msg1, msg2);
 
-        List<UserRegistrationEvent> messages = List.of(msg1, msg2);
+        CountDownLatch latch = new CountDownLatch(2);
+        doAnswer(inv -> {
+            latch.countDown();
+            return null;
+        }).when(dispatcherService).dispatch(anyList(), any());
 
         consumer.handleUserRegistrationEvents(messages, ack);
 
-        verify(dispatcherService, times(2)).dispatch(any(), eq(EventType.USER_REGISTERED), eq(Locale.ENGLISH));
-        verify(userRegistrationProcessor).handleUserRegistrationEvents(messages);
+        assertTrue(latch.await(1, TimeUnit.SECONDS), "Not all messages processed");
+        verify(processor).process(messages);
         verify(ack).acknowledge();
     }
 
-
     @Test
-    void shouldContinueProcessingIfOneMessageFails() {
-        UserRegistrationEvent msg1 = new UserRegistrationEvent();
-        msg1.setMessageId(1L);
+    void shouldContinueOnProcessingError() throws Exception {
+        UserRegisteredEvent msg1 = createTestEvent(1L);
+        UserRegisteredEvent msg2 = createTestEvent(2L);
+        List<UserRegisteredEvent> messages = List.of(msg1, msg2);
 
-        UserRegistrationEvent msg2 = new UserRegistrationEvent();
-        msg2.setMessageId(2L);
-
-        doThrow(new RuntimeException("Error in dispatcher"))
+        doThrow(new RuntimeException("Dispatch error"))
                 .when(dispatcherService)
-                .dispatch(eq(msg1), any(), any());
+                .dispatch(anyList(), any());
 
-        consumer.handleUserRegistrationEvents(List.of(msg1, msg2), ack);
+        consumer.handleUserRegistrationEvents(messages, ack);
 
-        verify(dispatcherService).dispatch(eq(msg1), any(), any());
-        verify(dispatcherService).dispatch(eq(msg2), any(), any());
-        verify(userRegistrationProcessor).handleUserRegistrationEvents(any());
+        verify(dispatcherService, times(2)).dispatch(anyList(), any());
+        verify(processor).process(messages);
         verify(ack).acknowledge();
     }
 
     @Test
-    void shouldIgnoreNullMessages() {
-        UserRegistrationEvent msg = new UserRegistrationEvent();
-
-        List<UserRegistrationEvent> messages = new ArrayList<>();
+    void shouldIgnoreNullMessages() throws Exception {
+        UserRegisteredEvent msg = createTestEvent(1L);
+        List<UserRegisteredEvent> messages = new ArrayList<>();
         messages.add(null);
         messages.add(msg);
 
+        CountDownLatch latch = new CountDownLatch(1);
+        doAnswer(inv -> {
+            latch.countDown();
+            return null;
+        }).when(processor).process(anyList());
+
         consumer.handleUserRegistrationEvents(messages, ack);
 
-        verify(dispatcherService, times(1)).dispatch(eq(msg), any(), any());
-        verify(userRegistrationProcessor).handleUserRegistrationEvents(messages);
+        assertTrue(latch.await(1, TimeUnit.SECONDS), "Processor not called");
+        verify(processor).process(messages);
         verify(ack).acknowledge();
+    }
+
+    private UserRegisteredEvent createTestEvent(Long messageId) {
+        UserRegisteredEvent event = new UserRegisteredEvent();
+        event.setMessageId(messageId);
+        event.setLocale(Locale.ENGLISH);
+        return event;
     }
 }

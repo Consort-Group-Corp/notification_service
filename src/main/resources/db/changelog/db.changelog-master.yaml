@@ -2,4 +2,8 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/V004_create_schema.sql
   - include:
-      file: db/changelog/changeset/V005_create_user_table.sql
+      file: db/changelog/changeset/V005_create_user_information_table.sql
+  - include:
+      file: db/changelog/changeset/V007_create_notifications_table.sql
+  - include:
+      file: db/changelog/changeset/V008__create_user_profile_update_log_table.sql

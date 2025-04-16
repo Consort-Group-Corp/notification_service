@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.MessageSource;
+import uz.consortgroup.notification_service.entity.enumeration.EventType;
 import uz.consortgroup.notification_service.event.EmailContent;
 
 import java.util.Locale;
@@ -90,6 +91,11 @@ public class AbstractEmailMessageBuilderTest {
         @Override
         public String getVerificationCode() {
             return "1234";
+        }
+
+        @Override
+        public EventType getEventType() {
+            return EventType.USER_REGISTERED;
         }
     }
 

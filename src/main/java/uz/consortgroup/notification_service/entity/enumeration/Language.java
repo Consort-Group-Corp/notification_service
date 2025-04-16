@@ -1,4 +1,4 @@
-package uz.consortgroup.notification_service.entity;
+package uz.consortgroup.notification_service.entity.enumeration;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

@@ -5,18 +5,21 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-import uz.consortgroup.notification_service.entity.EventType;
+import uz.consortgroup.notification_service.entity.enumeration.EventType;
 import uz.consortgroup.notification_service.event.VerificationCodeResentEvent;
 import uz.consortgroup.notification_service.service.EmailDispatcherService;
+import uz.consortgroup.notification_service.service.processor.VerificationCodeProcessor;
 
 import java.util.List;
 
 @Slf4j
 @Component
 public class VerificationCodeResentKafkaConsumer extends AbstractKafkaConsumer<VerificationCodeResentEvent> {
+    private final VerificationCodeProcessor processor;
 
-    public VerificationCodeResentKafkaConsumer(EmailDispatcherService dispatcherService) {
+    public VerificationCodeResentKafkaConsumer(EmailDispatcherService dispatcherService, VerificationCodeProcessor processor) {
         super(dispatcherService);
+        this.processor = processor;
     }
 
     @KafkaListener(
@@ -29,6 +32,7 @@ public class VerificationCodeResentKafkaConsumer extends AbstractKafkaConsumer<V
             Acknowledgment ack
     ) {
         log.info("Received {} code resend messages: {}", messages.size(), messages);
+        processor.process(messages);
         processBatch(messages, ack);
     }
 

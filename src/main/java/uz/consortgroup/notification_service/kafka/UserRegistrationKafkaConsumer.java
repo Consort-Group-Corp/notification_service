@@ -5,20 +5,21 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-import uz.consortgroup.notification_service.entity.EventType;
-import uz.consortgroup.notification_service.event.UserRegistrationEvent;
+import uz.consortgroup.notification_service.entity.enumeration.EventType;
+import uz.consortgroup.notification_service.event.UserRegisteredEvent;
 import uz.consortgroup.notification_service.service.EmailDispatcherService;
 import uz.consortgroup.notification_service.service.processor.UserRegistrationProcessor;
 
 import java.util.List;
 
+
 @Slf4j
 @Component
-public class UserRegistrationKafkaConsumer extends AbstractKafkaConsumer<UserRegistrationEvent> {
+public class UserRegistrationKafkaConsumer extends AbstractKafkaConsumer<UserRegisteredEvent> {
     private final UserRegistrationProcessor userRegistrationProcessor;
 
-    public UserRegistrationKafkaConsumer(EmailDispatcherService dispatcherService, UserRegistrationProcessor userRegistrationProcessor) {
-        super(dispatcherService);
+    protected UserRegistrationKafkaConsumer(EmailDispatcherService emailDispatcherService, UserRegistrationProcessor userRegistrationProcessor) {
+        super(emailDispatcherService);
         this.userRegistrationProcessor = userRegistrationProcessor;
     }
 
@@ -28,17 +29,16 @@ public class UserRegistrationKafkaConsumer extends AbstractKafkaConsumer<UserReg
             containerFactory = "universalKafkaListenerContainerFactory"
     )
     public void handleUserRegistrationEvents(
-            @Payload List<UserRegistrationEvent> messages,
+            @Payload List<UserRegisteredEvent> messages,
             Acknowledgment ack
     ) {
         log.info("Received {} registration messages: {}", messages.size(), messages);
-        log.info("Received {} registration messages", messages.size());
         processBatch(messages, ack);
-        userRegistrationProcessor.handleUserRegistrationEvents(messages);
+        userRegistrationProcessor.process(messages);
     }
 
     @Override
-    protected Long getMessageId(UserRegistrationEvent message) {
+    protected Long getMessageId(UserRegisteredEvent message) {
         return message.getMessageId();
     }
 

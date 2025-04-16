@@ -6,18 +6,19 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uz.consortgroup.notification_service.entity.EventType;
-import uz.consortgroup.notification_service.entity.Language;
+import uz.consortgroup.notification_service.entity.enumeration.EventType;
+import uz.consortgroup.notification_service.entity.enumeration.Language;
 
 import java.util.Locale;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Builder
-public class VerificationCodeResentEvent implements EmailContent {
+public class VerificationCodeResentEvent implements EmailContent, PersonalizableEmailContent {
     private Long messageId;
-    private Long userId;
+    private UUID userId;
     private String email;
     private String newVerificationCode;
     @JsonProperty("language")

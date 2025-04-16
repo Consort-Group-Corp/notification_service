@@ -16,6 +16,7 @@ import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.DeserializationException;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.util.backoff.FixedBackOff;
 import uz.consortgroup.notification_service.deserializer.MessageDeserializer;
 
@@ -58,9 +59,11 @@ public class KafkaConsumerConfig {
 
         props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, true);
 
-        props.put(JsonDeserializer.TYPE_MAPPINGS,
-                "user_registration:uz.consortgroup.notification_service.event.UserRegistrationEvent," +
-                        "verification_code_resent:uz.consortgroup.notification_service.event.VerificationCodeResentEvent");
+        props.put(JsonSerializer.TYPE_MAPPINGS,
+                        "user_registered:uz.consortgroup.notification_service.event.UserRegisteredEvent," +
+                        "verification_code_resent:uz.consortgroup.notification_service.event.VerificationCodeResentEvent," +
+                        "user_profile_update:uz.consortgroup.notification_service.event.UserProfileUpdateEvent," +
+                        "password_reset_requested:uz.consortgroup.notification_service.event.PasswordResetRequestedEvent");
         props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, sessionTimeoutMs);
         props.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, maxPartitionFetchBytes);
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPollRecords);

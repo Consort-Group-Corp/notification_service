@@ -38,6 +38,14 @@ dependencies {
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
+    //Google Guava
+    implementation ("com.google.guava:guava:32.1.2-jre")
+
+    //JWT
+    implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
+
     // Database driver
     runtimeOnly("org.postgresql:postgresql")
 
