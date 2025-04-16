@@ -28,10 +28,6 @@ public class RegistrationEmailBuilder extends AbstractEmailMessageBuilder<Person
 
     @Override
     protected Object[] getBodyArgs(PersonalizableEmailContent content) {
-        return new Object[]{
-                content.getFirstName(),
-                content.getMiddleName(),
-                content.getVerificationCode()
-        };
+        return new Object[]{content.getVerificationCode()};
     }
 }

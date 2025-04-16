@@ -1,24 +1,29 @@
 package uz.consortgroup.notification_service.kafka;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.support.Acknowledgment;
-import uz.consortgroup.notification_service.entity.EventType;
+import uz.consortgroup.notification_service.entity.enumeration.EventType;
 import uz.consortgroup.notification_service.event.EmailContent;
 import uz.consortgroup.notification_service.service.EmailDispatcherService;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
 public class AbstractKafkaConsumerTest {
@@ -30,52 +35,82 @@ public class AbstractKafkaConsumerTest {
 
     private TestKafkaConsumer consumer;
 
+    private ExecutorService testExecutor;
+
+
+
     @BeforeEach
     void setUp() {
+        testExecutor = Executors.newSingleThreadExecutor(runnable -> {
+            Thread t = new Thread(runnable);
+            t.setDaemon(true);
+            return t;
+        });
+
         consumer = new TestKafkaConsumer(dispatcherService);
     }
 
     @Test
-    void shouldProcessMessagesSuccessfully() {
+    void shouldProcessMessagesConcurrently() throws ExecutionException, InterruptedException {
         TestMessage msg1 = new TestMessage(1L, Locale.ENGLISH, "user1@example.com", "1234");
         TestMessage msg2 = new TestMessage(2L, Locale.ENGLISH, "user2@example.com", "5678");
 
         consumer.processBatch(List.of(msg1, msg2), ack);
 
-        verify(dispatcherService, times(2)).dispatch(any(), eq(EventType.USER_REGISTERED), eq(Locale.ENGLISH));
+        verify(dispatcherService, times(2)).dispatch(
+                anyList(),
+                eq(Locale.ENGLISH)
+        );
         verify(ack).acknowledge();
     }
 
     @Test
-    void shouldLogErrorAndContinueOnException() {
+    void shouldHandleExceptionsInIndividualMessages() {
         TestMessage msg1 = new TestMessage(1L, Locale.ENGLISH, "error@example.com", "0000");
         TestMessage msg2 = new TestMessage(2L, Locale.ENGLISH, "user@example.com", "9999");
 
         doThrow(new RuntimeException("dispatch error"))
                 .when(dispatcherService)
-                .dispatch(eq(msg1), eq(EventType.USER_REGISTERED), eq(Locale.ENGLISH));
+                .dispatch(Collections.singletonList(msg1), Locale.ENGLISH);
 
         consumer.processBatch(List.of(msg1, msg2), ack);
 
-        verify(dispatcherService).dispatch(eq(msg1), eq(EventType.USER_REGISTERED), eq(Locale.ENGLISH));
-        verify(dispatcherService).dispatch(eq(msg2), eq(EventType.USER_REGISTERED), eq(Locale.ENGLISH));
+        verify(dispatcherService).dispatch(Collections.singletonList(msg1), Locale.ENGLISH);
+        verify(dispatcherService).dispatch(Collections.singletonList(msg2), Locale.ENGLISH);
+        verify(ack).acknowledge();
+    }
+
+    @AfterEach
+    void tearDown() {
+        testExecutor.shutdown();
+    }
+
+
+    @Test
+    void shouldHandleEmptyBatch() {
+        consumer.processBatch(Collections.emptyList(), ack);
+
+        verifyNoMoreInteractions(dispatcherService);
         verify(ack).acknowledge();
     }
 
     @Test
-    void shouldIgnoreNullMessages() {
-        TestMessage msg = new TestMessage(1L, Locale.ENGLISH, "user@example.com", "1111");
+    void shouldProcessMessagesWithSameLocaleFromFirstMessage() {
+        TestMessage msg1 = new TestMessage(1L, Locale.ENGLISH, "user1@example.com", "1234");
+        TestMessage msg2 = new TestMessage(2L, Locale.FRENCH, "user2@example.com", "5678");
 
-        List<TestMessage> list = new ArrayList<>();
-        list.add(null);
-        list.add(msg);
+        consumer.processBatch(List.of(msg1, msg2), ack);
 
-        consumer.processBatch(list, ack);
-
-        verify(dispatcherService, times(1)).dispatch(any(), any(), any());
+        verify(dispatcherService).dispatch(
+                Collections.singletonList(msg1),
+                Locale.ENGLISH
+        );
+        verify(dispatcherService).dispatch(
+                Collections.singletonList(msg2),
+                Locale.ENGLISH
+        );
         verify(ack).acknowledge();
     }
-
 
     static class TestKafkaConsumer extends AbstractKafkaConsumer<TestMessage> {
         protected TestKafkaConsumer(EmailDispatcherService emailDispatcherService) {
@@ -119,6 +154,11 @@ public class AbstractKafkaConsumerTest {
         @Override
         public String getVerificationCode() {
             return verificationCode;
+        }
+
+        @Override
+        public EventType getEventType() {
+            return EventType.USER_REGISTERED;
         }
 
         public Long getMessageId() {
