@@ -5,13 +5,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
+import java.util.UUID;
 
 @Component
 @Slf4j
 public class ProcessedMessageCacheCleaner {
-    private final Set<Long> processedIds;
+    private final Set<UUID> processedIds;
 
-    public ProcessedMessageCacheCleaner(Set<Long> processedIds) {
+    public ProcessedMessageCacheCleaner(Set<UUID> processedIds) {
         this.processedIds = processedIds;
     }
 

@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import uz.consortgroup.notification_service.asspect.annotation.AspectAfterThrowing;
 import uz.consortgroup.notification_service.asspect.annotation.LoggingAspectAfterMethod;
@@ -14,9 +15,12 @@ import uz.consortgroup.notification_service.exception.EmailDispatchException;
 import uz.consortgroup.notification_service.exception.EmailSendingException;
 
 import jakarta.annotation.PostConstruct;
+
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Semaphore;
@@ -26,7 +30,7 @@ import java.util.concurrent.Semaphore;
 @Slf4j
 public class EmailDispatcherService {
     private final EmailService emailService;
-    private final ProcessedMessageTracker messageTracker;
+    private final StringRedisTemplate redisTemplate;
     private final TaskExecutor async;
     private final EmailDispatchProperties properties;
 
@@ -51,8 +55,9 @@ public class EmailDispatcherService {
             List<CompletableFuture<Void>> futures = new ArrayList<>(chunk.size());
 
             for (EmailContent content : chunk) {
+                UUID messageId = content.getMessageId();
 
-                if (messageTracker.isAlreadyProcessed(content.getMessageId())) {
+                if (!markIfNotProcessed(messageId)) {
                     continue;
                 }
 
@@ -60,8 +65,6 @@ public class EmailDispatcherService {
                     try {
                         semaphore.acquire();
                         sendEmailWithRetry(content, locale);
-                        messageTracker.markAsProcessed(content.getMessageId());
-
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         throw new EmailDispatchException("Thread interrupted while sending email", e);
@@ -83,6 +86,13 @@ public class EmailDispatcherService {
                 throw new EmailDispatchException("Error sending email", e);
             }
         }
+    }
+
+    private boolean markIfNotProcessed(UUID messageId) {
+        String key = "event_processed:" + messageId;
+        Boolean wasSet = redisTemplate.opsForValue()
+                .setIfAbsent(key, "true", Duration.ofMinutes(1));
+        return Boolean.TRUE.equals(wasSet);
     }
 
     private void sendEmailWithRetry(EmailContent content, Locale locale) {

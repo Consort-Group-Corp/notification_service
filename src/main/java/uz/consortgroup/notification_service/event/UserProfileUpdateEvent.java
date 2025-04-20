@@ -17,7 +17,7 @@ import java.util.UUID;
 @Builder
 public class UserProfileUpdateEvent implements EmailContent {
     @JsonProperty("messageId")
-    private Long messageId;
+    private UUID messageId;
     private UUID userId;
     private String lastName;
     private String firstName;
@@ -31,6 +31,11 @@ public class UserProfileUpdateEvent implements EmailContent {
     @Override
     public EventType getEventType() {
         return EventType.USER_PROFILE_UPDATED;
+    }
+
+    @Override
+    public UUID getMessageId() {
+        return messageId;
     }
 }
 

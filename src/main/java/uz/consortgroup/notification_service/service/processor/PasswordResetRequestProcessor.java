@@ -35,7 +35,6 @@ public class PasswordResetRequestProcessor implements EventProcessor<PasswordRes
     @LoggingAspectAfterMethod
     public void process(List<PasswordResetRequestedEvent> events) {
         if (events == null || events.isEmpty()) {
-            // Логика для пустого списка
             return;
         }
 

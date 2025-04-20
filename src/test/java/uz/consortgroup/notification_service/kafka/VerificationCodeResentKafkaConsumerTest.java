@@ -13,6 +13,7 @@ import uz.consortgroup.notification_service.service.processor.VerificationCodePr
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -45,8 +46,8 @@ public class VerificationCodeResentKafkaConsumerTest {
 
     @Test
     void shouldProcessAllMessagesSuccessfully() throws Exception {
-        VerificationCodeResentEvent msg1 = createTestEvent(101L);
-        VerificationCodeResentEvent msg2 = createTestEvent(102L);
+        VerificationCodeResentEvent msg1 = createTestEvent(UUID.randomUUID());
+        VerificationCodeResentEvent msg2 = createTestEvent(UUID.randomUUID());
         List<VerificationCodeResentEvent> messages = List.of(msg1, msg2);
 
         CountDownLatch latch = new CountDownLatch(1);
@@ -65,8 +66,8 @@ public class VerificationCodeResentKafkaConsumerTest {
 
     @Test
     void shouldNotCallDispatchWhenProcessorFails() throws Exception {
-        VerificationCodeResentEvent msg1 = createTestEvent(201L);
-        VerificationCodeResentEvent msg2 = createTestEvent(202L);
+        VerificationCodeResentEvent msg1 = createTestEvent(UUID.randomUUID());
+        VerificationCodeResentEvent msg2 = createTestEvent(UUID.randomUUID());
         List<VerificationCodeResentEvent> messages = List.of(msg1, msg2);
 
         doThrow(new RuntimeException("Processor error"))
@@ -86,7 +87,7 @@ public class VerificationCodeResentKafkaConsumerTest {
 
     @Test
     void shouldProcessMessagesWithNullValues() throws Exception {
-        VerificationCodeResentEvent msg = createTestEvent(301L);
+        VerificationCodeResentEvent msg = createTestEvent(UUID.randomUUID());
         List<VerificationCodeResentEvent> messages = new ArrayList<>();
         messages.add(null);
         messages.add(msg);
@@ -106,7 +107,7 @@ public class VerificationCodeResentKafkaConsumerTest {
         verify(ack).acknowledge();
     }
 
-    private VerificationCodeResentEvent createTestEvent(Long messageId) {
+    private VerificationCodeResentEvent createTestEvent(UUID messageId) {
         VerificationCodeResentEvent event = new VerificationCodeResentEvent();
         event.setMessageId(messageId);
         event.setLocale(Locale.ENGLISH);

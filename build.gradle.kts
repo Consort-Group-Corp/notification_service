@@ -49,6 +49,9 @@ dependencies {
     // Database driver
     runtimeOnly("org.postgresql:postgresql")
 
+    // Redis
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+
     // Apache Kafka
     implementation("org.springframework.kafka:spring-kafka:3.2.0")
 

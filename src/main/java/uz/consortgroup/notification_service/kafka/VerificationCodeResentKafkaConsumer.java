@@ -11,6 +11,7 @@ import uz.consortgroup.notification_service.service.EmailDispatcherService;
 import uz.consortgroup.notification_service.service.processor.VerificationCodeProcessor;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -37,7 +38,7 @@ public class VerificationCodeResentKafkaConsumer extends AbstractKafkaConsumer<V
     }
 
     @Override
-    protected Long getMessageId(VerificationCodeResentEvent message) {
+    protected UUID getMessageId(VerificationCodeResentEvent message) {
         return message.getMessageId();
     }
 

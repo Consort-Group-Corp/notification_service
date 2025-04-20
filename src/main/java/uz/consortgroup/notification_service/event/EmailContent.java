@@ -2,8 +2,10 @@ package uz.consortgroup.notification_service.event;
 
 import uz.consortgroup.notification_service.entity.enumeration.EventType;
 
+import java.util.UUID;
+
 public interface EmailContent extends Content {
-    Long getMessageId();
+    UUID getMessageId();
 
     default String getEmail() {
         return null;

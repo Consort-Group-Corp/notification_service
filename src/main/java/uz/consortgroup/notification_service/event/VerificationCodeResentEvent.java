@@ -17,7 +17,7 @@ import java.util.UUID;
 @Data
 @Builder
 public class VerificationCodeResentEvent implements EmailContent, PersonalizableEmailContent {
-    private Long messageId;
+    private UUID messageId;
     private UUID userId;
     private String email;
     private String newVerificationCode;
@@ -43,7 +43,7 @@ public class VerificationCodeResentEvent implements EmailContent, Personalizable
     }
 
     @Override
-    public Long getMessageId() {
+    public UUID getMessageId() {
         return messageId;
     }
 }

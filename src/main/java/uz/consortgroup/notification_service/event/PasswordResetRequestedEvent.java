@@ -16,7 +16,7 @@ import java.util.UUID;
 @Data
 @Builder
 public class PasswordResetRequestedEvent implements EmailContent {
-    private Long messageId;
+    private UUID messageId;
     private UUID userId;
     private String email;
     private String token;
@@ -40,5 +40,10 @@ public class PasswordResetRequestedEvent implements EmailContent {
     @Override
     public Locale getLocale() {
         return resolveLocale(language, locale);
+    }
+
+    @Override
+    public UUID getMessageId() {
+        return messageId;
     }
 }

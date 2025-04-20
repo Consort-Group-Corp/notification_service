@@ -14,6 +14,7 @@ import uz.consortgroup.notification_service.service.EmailDispatcherService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,8 +53,8 @@ public class AbstractKafkaConsumerTest {
 
     @Test
     void shouldProcessMessagesConcurrently() throws ExecutionException, InterruptedException {
-        TestMessage msg1 = new TestMessage(1L, Locale.ENGLISH, "user1@example.com", "1234");
-        TestMessage msg2 = new TestMessage(2L, Locale.ENGLISH, "user2@example.com", "5678");
+        TestMessage msg1 = new TestMessage(UUID.randomUUID(), Locale.ENGLISH, "user1@example.com", "1234");
+        TestMessage msg2 = new TestMessage(UUID.randomUUID(), Locale.ENGLISH, "user2@example.com", "5678");
 
         consumer.processBatch(List.of(msg1, msg2), ack);
 
@@ -66,8 +67,8 @@ public class AbstractKafkaConsumerTest {
 
     @Test
     void shouldHandleExceptionsInIndividualMessages() {
-        TestMessage msg1 = new TestMessage(1L, Locale.ENGLISH, "error@example.com", "0000");
-        TestMessage msg2 = new TestMessage(2L, Locale.ENGLISH, "user@example.com", "9999");
+        TestMessage msg1 = new TestMessage(UUID.randomUUID(), Locale.ENGLISH, "error@example.com", "0000");
+        TestMessage msg2 = new TestMessage(UUID.randomUUID(), Locale.ENGLISH, "user@example.com", "9999");
 
         doThrow(new RuntimeException("dispatch error"))
                 .when(dispatcherService)
@@ -96,8 +97,8 @@ public class AbstractKafkaConsumerTest {
 
     @Test
     void shouldProcessMessagesWithSameLocaleFromFirstMessage() {
-        TestMessage msg1 = new TestMessage(1L, Locale.ENGLISH, "user1@example.com", "1234");
-        TestMessage msg2 = new TestMessage(2L, Locale.FRENCH, "user2@example.com", "5678");
+        TestMessage msg1 = new TestMessage(UUID.randomUUID(), Locale.ENGLISH, "user1@example.com", "1234");
+        TestMessage msg2 = new TestMessage(UUID.randomUUID(), Locale.FRENCH, "user2@example.com", "5678");
 
         consumer.processBatch(List.of(msg1, msg2), ack);
 
@@ -118,7 +119,7 @@ public class AbstractKafkaConsumerTest {
         }
 
         @Override
-        protected Long getMessageId(TestMessage message) {
+        protected UUID getMessageId(TestMessage message) {
             return message.getMessageId();
         }
 
@@ -129,12 +130,12 @@ public class AbstractKafkaConsumerTest {
     }
 
     static class TestMessage implements EmailContent {
-        private final Long messageId;
+        private final UUID messageId;
         private final Locale locale;
         private final String email;
         private final String verificationCode;
 
-        public TestMessage(Long messageId, Locale locale, String email, String verificationCode) {
+        public TestMessage(UUID messageId, Locale locale, String email, String verificationCode) {
             this.messageId = messageId;
             this.locale = locale;
             this.email = email;
@@ -161,7 +162,7 @@ public class AbstractKafkaConsumerTest {
             return EventType.USER_REGISTERED;
         }
 
-        public Long getMessageId() {
+        public UUID getMessageId() {
             return messageId;
         }
     }
