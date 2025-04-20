@@ -12,6 +12,7 @@ import uz.consortgroup.notification_service.service.processor.PasswordResetReque
 import uz.consortgroup.notification_service.validator.PasswordTokenValidator;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -40,7 +41,7 @@ public class PasswordResetKafkaConsumer extends AbstractKafkaConsumer<PasswordRe
     }
 
     @Override
-    protected Long getMessageId(PasswordResetRequestedEvent message) {
+    protected UUID getMessageId(PasswordResetRequestedEvent message) {
         return message.getMessageId();
     }
 

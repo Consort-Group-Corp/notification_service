@@ -10,6 +10,7 @@ import uz.consortgroup.notification_service.entity.enumeration.EventType;
 import uz.consortgroup.notification_service.event.EmailContent;
 
 import java.util.Locale;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -79,8 +80,8 @@ public class AbstractEmailMessageBuilderTest {
         }
 
         @Override
-        public Long getMessageId() {
-            return 1L;
+        public UUID getMessageId() {
+            return UUID.randomUUID();
         }
 
         @Override

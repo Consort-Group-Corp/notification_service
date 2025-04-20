@@ -12,6 +12,7 @@ import uz.consortgroup.notification_service.service.processor.ProfileUpdateProce
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
@@ -36,8 +37,8 @@ public class UserProfileUpdateKafkaConsumerTest {
 
     @Test
     void shouldProcessValidUserRegistrationEvents() {
-        UserProfileUpdateEvent msg1 = createTestEvent(1L);
-        UserProfileUpdateEvent msg2 = createTestEvent(2L);
+        UserProfileUpdateEvent msg1 = createTestEvent(UUID.randomUUID());
+        UserProfileUpdateEvent msg2 = createTestEvent(UUID.randomUUID());
 
         List<UserProfileUpdateEvent> messages = List.of(msg1, msg2);
 
@@ -49,8 +50,8 @@ public class UserProfileUpdateKafkaConsumerTest {
 
     @Test
     void shouldThrowExceptionWhenProcessorFails() {
-        UserProfileUpdateEvent msg1 = createTestEvent(1L);
-        UserProfileUpdateEvent msg2 = createTestEvent(2L);
+        UserProfileUpdateEvent msg1 = createTestEvent(UUID.randomUUID());
+        UserProfileUpdateEvent msg2 = createTestEvent(UUID.randomUUID());
         List<UserProfileUpdateEvent> messages = List.of(msg1, msg2);
 
         doThrow(new RuntimeException("Processor error"))
@@ -68,7 +69,7 @@ public class UserProfileUpdateKafkaConsumerTest {
 
     @Test
     void shouldIgnoreNullMessages() {
-        UserProfileUpdateEvent msg = createTestEvent(1L);
+        UserProfileUpdateEvent msg = createTestEvent(UUID.randomUUID());
 
         List<UserProfileUpdateEvent> messages = new ArrayList<>();
         messages.add(null);
@@ -80,7 +81,7 @@ public class UserProfileUpdateKafkaConsumerTest {
         verify(ack).acknowledge();
     }
 
-    private UserProfileUpdateEvent createTestEvent(Long messageId) {
+    private UserProfileUpdateEvent createTestEvent(UUID messageId) {
         UserProfileUpdateEvent event = new UserProfileUpdateEvent();
         event.setMessageId(messageId);
         return event;

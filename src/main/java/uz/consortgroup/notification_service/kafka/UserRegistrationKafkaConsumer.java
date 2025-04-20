@@ -11,6 +11,7 @@ import uz.consortgroup.notification_service.service.EmailDispatcherService;
 import uz.consortgroup.notification_service.service.processor.UserRegistrationProcessor;
 
 import java.util.List;
+import java.util.UUID;
 
 
 @Slf4j
@@ -38,7 +39,7 @@ public class UserRegistrationKafkaConsumer extends AbstractKafkaConsumer<UserReg
     }
 
     @Override
-    protected Long getMessageId(UserRegisteredEvent message) {
+    protected UUID getMessageId(UserRegisteredEvent message) {
         return message.getMessageId();
     }
 

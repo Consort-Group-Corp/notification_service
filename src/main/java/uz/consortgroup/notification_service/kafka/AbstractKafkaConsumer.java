@@ -10,6 +10,7 @@ import uz.consortgroup.notification_service.service.EmailDispatcherService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -50,6 +51,6 @@ public abstract class AbstractKafkaConsumer<T extends EmailContent> {
         }
     }
 
-    protected abstract Long getMessageId(T message);
+    protected abstract UUID getMessageId(T message);
     protected abstract EventType getEventType();
 }

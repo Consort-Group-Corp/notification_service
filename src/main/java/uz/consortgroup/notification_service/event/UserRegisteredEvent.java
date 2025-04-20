@@ -17,7 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class UserRegisteredEvent implements EmailContent, PersonalizableEmailContent {
     @JsonProperty("messageId")
-    private Long messageId;
+    private UUID messageId;
     @JsonProperty("language")
     private Language language;
     private UUID userId;
@@ -45,5 +45,10 @@ public class UserRegisteredEvent implements EmailContent, PersonalizableEmailCon
     @Override
     public EventType getEventType() {
         return EventType.USER_REGISTERED;
+    }
+
+    @Override
+    public UUID getMessageId() {
+        return messageId;
     }
 }

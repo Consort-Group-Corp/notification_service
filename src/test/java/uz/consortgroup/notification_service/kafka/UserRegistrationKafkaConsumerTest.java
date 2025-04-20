@@ -13,6 +13,7 @@ import uz.consortgroup.notification_service.service.processor.UserRegistrationPr
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -42,8 +43,8 @@ public class UserRegistrationKafkaConsumerTest {
 
     @Test
     void shouldProcessAllMessagesSuccessfully() throws Exception {
-        UserRegisteredEvent msg1 = createTestEvent(1L);
-        UserRegisteredEvent msg2 = createTestEvent(2L);
+        UserRegisteredEvent msg1 = createTestEvent(UUID.randomUUID());
+        UserRegisteredEvent msg2 = createTestEvent(UUID.randomUUID());
         List<UserRegisteredEvent> messages = List.of(msg1, msg2);
 
         CountDownLatch latch = new CountDownLatch(2);
@@ -61,8 +62,8 @@ public class UserRegistrationKafkaConsumerTest {
 
     @Test
     void shouldContinueOnProcessingError() throws Exception {
-        UserRegisteredEvent msg1 = createTestEvent(1L);
-        UserRegisteredEvent msg2 = createTestEvent(2L);
+        UserRegisteredEvent msg1 = createTestEvent(UUID.randomUUID());
+        UserRegisteredEvent msg2 = createTestEvent(UUID.randomUUID());
         List<UserRegisteredEvent> messages = List.of(msg1, msg2);
 
         doThrow(new RuntimeException("Dispatch error"))
@@ -78,7 +79,7 @@ public class UserRegistrationKafkaConsumerTest {
 
     @Test
     void shouldIgnoreNullMessages() throws Exception {
-        UserRegisteredEvent msg = createTestEvent(1L);
+        UserRegisteredEvent msg = createTestEvent(UUID.randomUUID());
         List<UserRegisteredEvent> messages = new ArrayList<>();
         messages.add(null);
         messages.add(msg);
@@ -96,7 +97,7 @@ public class UserRegistrationKafkaConsumerTest {
         verify(ack).acknowledge();
     }
 
-    private UserRegisteredEvent createTestEvent(Long messageId) {
+    private UserRegisteredEvent createTestEvent(UUID messageId) {
         UserRegisteredEvent event = new UserRegisteredEvent();
         event.setMessageId(messageId);
         event.setLocale(Locale.ENGLISH);

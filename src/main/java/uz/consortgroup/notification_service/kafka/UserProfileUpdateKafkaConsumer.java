@@ -11,6 +11,7 @@ import uz.consortgroup.notification_service.service.EmailDispatcherService;
 import uz.consortgroup.notification_service.service.processor.ProfileUpdateProcessor;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -37,7 +38,7 @@ public class UserProfileUpdateKafkaConsumer extends AbstractKafkaConsumer<UserPr
     }
 
     @Override
-    protected Long getMessageId(UserProfileUpdateEvent message) {
+    protected UUID getMessageId(UserProfileUpdateEvent message) {
         return message.getMessageId();
     }
 

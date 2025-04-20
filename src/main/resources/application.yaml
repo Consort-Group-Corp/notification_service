@@ -28,6 +28,11 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
+  data:
+    redis:
+      host: localhost
+      port: 6383
+
 logging:
   level:
     root: INFO

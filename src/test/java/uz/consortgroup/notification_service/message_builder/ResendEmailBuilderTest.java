@@ -10,6 +10,7 @@ import uz.consortgroup.notification_service.entity.enumeration.EventType;
 import uz.consortgroup.notification_service.event.EmailContent;
 
 import java.util.Locale;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,8 +59,8 @@ public class ResendEmailBuilderTest {
     void buildSubject_shouldThrowExceptionWhenInvalidContentType() {
         EmailContent invalidContent = new EmailContent() {
             @Override
-            public Long getMessageId() {
-                return 1L;
+            public UUID getMessageId() {
+                return UUID.randomUUID();
             }
 
             @Override

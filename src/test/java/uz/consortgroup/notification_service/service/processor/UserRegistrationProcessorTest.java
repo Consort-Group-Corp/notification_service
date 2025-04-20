@@ -49,8 +49,8 @@ class UserRegistrationProcessorTest {
     void process_shouldExecuteAllStepsForValidEvents() {
         UUID userId1 = UUID.fromString("00000000-0000-0000-0000-000000000001");
         UUID userId2 = UUID.fromString("00000000-0000-0000-0000-000000000002");
-        Long messageId1 = 1L;
-        Long messageId2 = 2L;
+        UUID messageId1 = UUID.randomUUID();
+        UUID messageId2 = UUID.randomUUID();
 
         UserRegisteredEvent event1 = createTestEvent(userId1, messageId1, "user1@test.com", "CODE123", Locale.ENGLISH);
         UserRegisteredEvent event2 = createTestEvent(userId2, messageId2, "user2@test.com", "CODE456", Locale.ENGLISH);
@@ -72,7 +72,7 @@ class UserRegistrationProcessorTest {
     @Test
     void process_shouldHandleSingleEvent() {
         UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000003");
-        Long messageId = 3L;
+        UUID messageId = UUID.randomUUID();
         UserRegisteredEvent event = createTestEvent(userId, messageId, "user@test.com", "CODE789", Locale.FRENCH);
 
         processor.process(List.of(event));
@@ -94,7 +94,7 @@ class UserRegistrationProcessorTest {
         assertThrows(NullPointerException.class, () -> processor.process(null));
     }
 
-    private UserRegisteredEvent createTestEvent(UUID userId, Long messageId, String email, String code, Locale locale) {
+    private UserRegisteredEvent createTestEvent(UUID userId, UUID messageId, String email, String code, Locale locale) {
         UserRegisteredEvent event = new UserRegisteredEvent();
         event.setUserId(userId);
         event.setMessageId(messageId);

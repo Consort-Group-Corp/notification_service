@@ -14,6 +14,7 @@ import uz.consortgroup.notification_service.validator.PasswordTokenValidator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -51,8 +52,8 @@ public class PasswordResetKafkaConsumerTest {
 
     @Test
     void shouldProcessAllMessagesSuccessfully() throws Exception {
-        PasswordResetRequestedEvent msg1 = createTestEvent(1L);
-        PasswordResetRequestedEvent msg2 = createTestEvent(2L);
+        PasswordResetRequestedEvent msg1 = createTestEvent(UUID.randomUUID());
+        PasswordResetRequestedEvent msg2 = createTestEvent(UUID.randomUUID());
         List<PasswordResetRequestedEvent> messages = List.of(msg1, msg2);
 
         CountDownLatch latch = new CountDownLatch(3);
@@ -84,8 +85,8 @@ public class PasswordResetKafkaConsumerTest {
 
     @Test
     void shouldContinueOnProcessingError() {
-        PasswordResetRequestedEvent msg1 = createTestEvent(1L);
-        PasswordResetRequestedEvent msg2 = createTestEvent(2L);
+        PasswordResetRequestedEvent msg1 = createTestEvent(UUID.randomUUID());
+        PasswordResetRequestedEvent msg2 = createTestEvent(UUID.randomUUID());
         List<PasswordResetRequestedEvent> messages = List.of(msg1, msg2);
 
         doNothing().when(passwordTokenValidator).validateTokensAsync(anyList());
@@ -115,7 +116,7 @@ public class PasswordResetKafkaConsumerTest {
 
     @Test
     void shouldIgnoreNullMessages() {
-        PasswordResetRequestedEvent msg = createTestEvent(1L);
+        PasswordResetRequestedEvent msg = createTestEvent(UUID.randomUUID());
         List<PasswordResetRequestedEvent> messages = new ArrayList<>();
         messages.add(null);
         messages.add(msg);
@@ -136,7 +137,7 @@ public class PasswordResetKafkaConsumerTest {
         verify(ack).acknowledge();
     }
 
-    private PasswordResetRequestedEvent createTestEvent(Long messageId) {
+    private PasswordResetRequestedEvent createTestEvent(UUID messageId) {
         PasswordResetRequestedEvent event = new PasswordResetRequestedEvent();
         event.setMessageId(messageId);
         event.setLocale(Locale.ENGLISH);

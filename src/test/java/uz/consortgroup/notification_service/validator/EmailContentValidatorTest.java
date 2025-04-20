@@ -13,6 +13,7 @@ import uz.consortgroup.notification_service.message_builder.EmailMessageBuilder;
 import uz.consortgroup.notification_service.service.NotificationService;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -40,8 +41,8 @@ class EmailContentValidatorTest {
     void validateBuilder_doesNotThrowWhenBuilderIsNotNull() {
         EmailContent content = new EmailContent() {
             @Override
-            public Long getMessageId() {
-                return 1L;
+            public UUID getMessageId() {
+                return UUID.randomUUID();
             }
 
             @Override
@@ -67,8 +68,8 @@ class EmailContentValidatorTest {
     void validateBuilder_throwsIllegalArgumentExceptionWhenBuilderIsNullAndEmailIsNull() {
         EmailContent content = new EmailContent() {
             @Override
-            public Long getMessageId() {
-                return 1L;
+            public UUID getMessageId() {
+                return UUID.randomUUID();
             }
 
             @Override
