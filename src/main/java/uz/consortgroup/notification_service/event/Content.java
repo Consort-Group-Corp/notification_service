@@ -11,7 +11,7 @@ public interface Content {
 
     default Locale resolveLocale(Language language, Locale fallback) {
         if (language != null) {
-            return new Locale(language.getCode());
+            return Locale.forLanguageTag(language.getCode());
         }
         return fallback != null ? fallback : Locale.ENGLISH;
     }
