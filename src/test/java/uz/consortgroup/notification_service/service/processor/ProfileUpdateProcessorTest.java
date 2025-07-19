@@ -8,8 +8,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uz.consortgroup.notification_service.entity.enumeration.EventType;
 import uz.consortgroup.notification_service.event.UserProfileUpdateEvent;
-import uz.consortgroup.notification_service.service.UserInformationService;
-import uz.consortgroup.notification_service.service.UserProfileUpdateLogService;
+import uz.consortgroup.notification_service.service.user.UserInformationServiceImpl;
+import uz.consortgroup.notification_service.service.user.UserProfileUpdateLogServiceImpl;
 import uz.consortgroup.notification_service.validator.ProfileUpdateProcessorValidator;
 
 import java.util.List;
@@ -27,10 +27,10 @@ class ProfileUpdateProcessorTest {
     private ProfileUpdateProcessor processor;
 
     @Mock
-    private UserInformationService userInformationService;
+    private UserInformationServiceImpl userInformationServiceImpl;
 
     @Mock
-    private UserProfileUpdateLogService userProfileUpdateLogService;
+    private UserProfileUpdateLogServiceImpl userProfileUpdateLogServiceImpl;
 
     @Mock
     private ProfileUpdateProcessorValidator profileUpdateProcessorValidator;
@@ -52,8 +52,8 @@ class ProfileUpdateProcessorTest {
         processor.process(validEvents);
 
         verify(profileUpdateProcessorValidator, times(1)).validateEvents(validEvents);
-        verify(userInformationService, times(1)).saveUserFullInfo(validEvents);
-        verify(userProfileUpdateLogService, times(1)).logUserProfileUpdate(any(), eq(EventType.USER_PROFILE_UPDATED));
+        verify(userInformationServiceImpl, times(1)).saveUserFullInfo(validEvents);
+        verify(userProfileUpdateLogServiceImpl, times(1)).logUserProfileUpdate(any(), eq(EventType.USER_PROFILE_UPDATED));
     }
 
     @Test
@@ -65,8 +65,8 @@ class ProfileUpdateProcessorTest {
 
         assertThrows(IllegalArgumentException.class, () -> processor.process(emptyEvents));
 
-        verifyNoInteractions(userInformationService);
-        verifyNoInteractions(userProfileUpdateLogService);
+        verifyNoInteractions(userInformationServiceImpl);
+        verifyNoInteractions(userProfileUpdateLogServiceImpl);
     }
 
     @Test
@@ -80,8 +80,8 @@ class ProfileUpdateProcessorTest {
 
         assertThrows(IllegalArgumentException.class, () -> processor.process(invalidEvents));
 
-        verifyNoInteractions(userInformationService);
-        verifyNoInteractions(userProfileUpdateLogService);
+        verifyNoInteractions(userInformationServiceImpl);
+        verifyNoInteractions(userProfileUpdateLogServiceImpl);
     }
 
     @Test

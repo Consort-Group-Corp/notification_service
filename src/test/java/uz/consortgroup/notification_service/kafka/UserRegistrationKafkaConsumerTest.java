@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.support.Acknowledgment;
 import uz.consortgroup.notification_service.event.UserRegisteredEvent;
-import uz.consortgroup.notification_service.service.EmailDispatcherService;
+import uz.consortgroup.notification_service.service.email.EmailDispatcherService;
 import uz.consortgroup.notification_service.service.processor.UserRegistrationProcessor;
 
 import java.util.ArrayList;

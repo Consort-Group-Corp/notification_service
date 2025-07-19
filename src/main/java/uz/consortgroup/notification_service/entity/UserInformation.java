@@ -17,7 +17,7 @@
     import lombok.Getter;
     import lombok.NoArgsConstructor;
     import lombok.Setter;
-    import uz.consortgroup.notification_service.entity.enumeration.Language;
+    import uz.consortgroup.core.api.v1.dto.user.enumeration.Language;
 
     import java.time.LocalDate;
     import java.time.LocalDateTime;
@@ -64,7 +64,7 @@
         private String email;
 
         @OneToMany(mappedBy = "userInformation", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-        private List<Notification> notifications;
+        private List<NotificationLog> notificationLogs;
 
         @OneToMany(mappedBy = "userInformation", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         private List<UserProfileUpdateLog> userProfileUpdateLogs;

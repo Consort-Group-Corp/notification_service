@@ -7,8 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uz.consortgroup.notification_service.entity.enumeration.EventType;
 import uz.consortgroup.notification_service.event.PasswordResetRequestedEvent;
-import uz.consortgroup.notification_service.service.EmailDispatcherService;
-import uz.consortgroup.notification_service.service.NotificationService;
+import uz.consortgroup.notification_service.service.email.EmailDispatcherService;
+import uz.consortgroup.notification_service.service.notification.NotificationLogServiceImpl;
 import uz.consortgroup.notification_service.validator.PasswordResetRequestValidator;
 
 import java.util.List;
@@ -32,7 +32,7 @@ class PasswordResetRequestProcessorTest {
     private EmailDispatcherService emailDispatcherService;
 
     @Mock
-    private NotificationService notificationService;
+    private NotificationLogServiceImpl notificationLogServiceImpl;
 
     @Mock
     private PasswordResetRequestValidator passwordResetRequestValidator;
@@ -63,7 +63,7 @@ class PasswordResetRequestProcessorTest {
             eq(Locale.ENGLISH)
         );
         
-        verify(notificationService).createNotification(
+        verify(notificationLogServiceImpl).createNotification(
             argThat(list -> list.size() == 2 && list.containsAll(List.of(userId1, userId2))),
             eq(EventType.PASSWORD_RESET_REQUESTED)
         );
@@ -81,7 +81,7 @@ class PasswordResetRequestProcessorTest {
             eq(Locale.FRENCH)
         );
         
-        verify(notificationService).createNotification(
+        verify(notificationLogServiceImpl).createNotification(
             argThat(list -> list.size() == 1 && list.contains(userId)),
             eq(EventType.PASSWORD_RESET_REQUESTED)
         );
@@ -93,7 +93,7 @@ class PasswordResetRequestProcessorTest {
         assertDoesNotThrow(() -> processor.process(List.of()));
 
         verifyNoInteractions(emailDispatcherService);
-        verifyNoInteractions(notificationService);
+        verifyNoInteractions(notificationLogServiceImpl);
     }
 
 

@@ -8,8 +8,8 @@ import uz.consortgroup.notification_service.asspect.annotation.LoggingAspectBefo
 import uz.consortgroup.notification_service.entity.enumeration.EventType;
 import uz.consortgroup.notification_service.event.EventProcessor;
 import uz.consortgroup.notification_service.event.UserProfileUpdateEvent;
-import uz.consortgroup.notification_service.service.UserInformationService;
-import uz.consortgroup.notification_service.service.UserProfileUpdateLogService;
+import uz.consortgroup.notification_service.service.user.UserInformationService;
+import uz.consortgroup.notification_service.service.user.UserProfileUpdateLogService;
 import uz.consortgroup.notification_service.validator.ProfileUpdateProcessorValidator;
 
 import java.util.List;

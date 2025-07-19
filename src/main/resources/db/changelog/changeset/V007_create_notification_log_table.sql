@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS notification_schema.notification (
+CREATE TABLE IF NOT EXISTS notification_schema.notification_log (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID NOT NULL,
     event_type VARCHAR(255) NOT NULL,

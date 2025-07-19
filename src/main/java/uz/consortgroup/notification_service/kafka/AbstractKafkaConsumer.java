@@ -5,7 +5,7 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 import uz.consortgroup.notification_service.event.EmailContent;
 import uz.consortgroup.notification_service.entity.enumeration.EventType;
-import uz.consortgroup.notification_service.service.EmailDispatcherService;
+import uz.consortgroup.notification_service.service.email.EmailDispatcherService;
 
 import java.util.Collections;
 import java.util.List;

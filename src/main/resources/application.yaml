@@ -79,3 +79,8 @@ mail:
         starttls:
           enable: true
   subjectForEmail: "Registration code"
+
+
+user:
+  service:
+    url: http://localhost:8081

@@ -18,9 +18,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import uz.consortgroup.notification_service.entity.enumeration.Communication;
+import uz.consortgroup.core.api.v1.dto.user.enumeration.Communication;
+import uz.consortgroup.core.api.v1.dto.user.enumeration.NotificationStatus;
 import uz.consortgroup.notification_service.entity.enumeration.EventType;
-import uz.consortgroup.notification_service.entity.enumeration.NotificationStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -28,12 +28,12 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "notification", schema = "notification_schema")
+@Table(name = "notification_log", schema = "notification_schema")
 @EqualsAndHashCode
 @Getter
 @Setter
 @Builder
-public class Notification {
+public class NotificationLog {
     @Id
     @Column(columnDefinition = "uuid")
     @GeneratedValue(strategy = GenerationType.UUID)

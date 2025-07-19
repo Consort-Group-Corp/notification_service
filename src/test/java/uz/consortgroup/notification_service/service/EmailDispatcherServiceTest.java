@@ -14,6 +14,8 @@ import uz.consortgroup.notification_service.config.properties.EmailDispatchPrope
 import uz.consortgroup.notification_service.event.EmailContent;
 import uz.consortgroup.notification_service.exception.EmailDispatchException;
 import uz.consortgroup.notification_service.exception.EmailSendingException;
+import uz.consortgroup.notification_service.service.email.EmailDispatcherService;
+import uz.consortgroup.notification_service.service.email.EmailService;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

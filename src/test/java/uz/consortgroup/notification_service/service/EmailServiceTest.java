@@ -9,12 +9,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import uz.consortgroup.core.api.v1.dto.user.enumeration.NotificationStatus;
 import uz.consortgroup.notification_service.entity.enumeration.EventType;
-import uz.consortgroup.notification_service.entity.enumeration.NotificationStatus;
 import uz.consortgroup.notification_service.event.EmailContent;
 import uz.consortgroup.notification_service.exception.EmailSendingException;
 import uz.consortgroup.notification_service.factory.EmailBuilderFactory;
 import uz.consortgroup.notification_service.message_builder.EmailMessageBuilder;
+import uz.consortgroup.notification_service.service.email.EmailService;
+import uz.consortgroup.notification_service.service.notification.NotificationLogServiceImpl;
 import uz.consortgroup.notification_service.validator.EmailContentValidator;
 
 import java.util.List;
@@ -33,7 +35,7 @@ class EmailServiceTest {
     private JavaMailSender mailSender;
 
     @Mock
-    private NotificationService notificationService;
+    private NotificationLogServiceImpl notificationLogServiceImpl;
 
     @Mock
     private EmailContentValidator emailContentValidator;
@@ -61,7 +63,7 @@ class EmailServiceTest {
         emailService.sendEmail(emailContent, Locale.ENGLISH);
 
         verify(mailSender).send(mimeMessage);
-        verify(notificationService).updateNotificationsStatus(List.of("test@example.com"), NotificationStatus.SENT);
+        verify(notificationLogServiceImpl).updateNotificationsStatus(List.of("test@example.com"), NotificationStatus.SENT);
     }
 
     @Test
@@ -81,7 +83,7 @@ class EmailServiceTest {
         assertThrows(EmailSendingException.class, () ->
                 emailService.sendEmail(emailContent, Locale.ENGLISH));
 
-        verify(notificationService).updateNotificationsStatus(List.of("test@example.com"), NotificationStatus.FAILED);
+        verify(notificationLogServiceImpl).updateNotificationsStatus(List.of("test@example.com"), NotificationStatus.FAILED);
     }
 
     @Test
@@ -93,7 +95,7 @@ class EmailServiceTest {
         assertThrows(EmailSendingException.class, () ->
                 emailService.sendEmail(emailContent, Locale.ENGLISH));
 
-        verify(notificationService).updateNotificationsStatus(any(), eq(NotificationStatus.FAILED));
+        verify(notificationLogServiceImpl).updateNotificationsStatus(any(), eq(NotificationStatus.FAILED));
         verify(mailSender, never()).send(any(MimeMessage.class));
     }
 

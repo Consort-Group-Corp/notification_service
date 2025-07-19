@@ -4,6 +4,12 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/V005_create_user_information_table.sql
   - include:
-      file: db/changelog/changeset/V007_create_notifications_table.sql
+      file: db/changelog/changeset/V007_create_notification_log_table.sql
   - include:
       file: db/changelog/changeset/V008__create_user_profile_update_log_table.sql
+  - include:
+      file: db/changelog/changeset/V036_create_notification_task_table.sql
+  - include:
+      file: db/changelog/changeset/V037_create_notification_task_recipient_table.sql
+  - include:
+      file: db/changelog/changeset/V039_create_notification_task_translation_table.sql

@@ -7,7 +7,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import uz.consortgroup.notification_service.entity.enumeration.EventType;
 import uz.consortgroup.notification_service.event.UserRegisteredEvent;
-import uz.consortgroup.notification_service.service.EmailDispatcherService;
+import uz.consortgroup.notification_service.service.email.EmailDispatcherService;
 import uz.consortgroup.notification_service.service.processor.UserRegistrationProcessor;
 
 import java.util.List;

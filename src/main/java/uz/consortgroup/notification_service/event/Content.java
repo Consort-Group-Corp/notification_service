@@ -1,6 +1,6 @@
 package uz.consortgroup.notification_service.event;
 
-import uz.consortgroup.notification_service.entity.enumeration.Language;
+import uz.consortgroup.core.api.v1.dto.user.enumeration.Language;
 
 import java.util.Locale;
 
