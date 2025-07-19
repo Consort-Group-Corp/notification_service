@@ -9,8 +9,8 @@ import uz.consortgroup.notification_service.entity.enumeration.EventType;
 import uz.consortgroup.notification_service.event.EmailContent;
 import uz.consortgroup.notification_service.event.EventProcessor;
 import uz.consortgroup.notification_service.event.VerificationCodeResentEvent;
-import uz.consortgroup.notification_service.service.EmailDispatcherService;
-import uz.consortgroup.notification_service.service.NotificationService;
+import uz.consortgroup.notification_service.service.email.EmailDispatcherService;
+import uz.consortgroup.notification_service.service.notification.NotificationLogService;
 import uz.consortgroup.notification_service.validator.VerificationCodeProcessorValidator;
 
 import java.util.List;
@@ -19,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VerificationCodeProcessor implements EventProcessor<VerificationCodeResentEvent> {
     private final EmailDispatcherService emailDispatcherService;
-    private final NotificationService notificationService;
+    private final NotificationLogService notificationLogService;
     private final VerificationCodeProcessorValidator verificationCodeProcessorValidator;
 
     @Override
@@ -40,7 +40,7 @@ public class VerificationCodeProcessor implements EventProcessor<VerificationCod
 
         emailDispatcherService.dispatch(emailContents, events.get(0).getLocale());
 
-        notificationService.createNotification(events.stream()
+        notificationLogService.createNotification(events.stream()
                 .map(VerificationCodeResentEvent::getUserId).toList(), EventType.VERIFICATION_CODE_SENT);
     }
 }

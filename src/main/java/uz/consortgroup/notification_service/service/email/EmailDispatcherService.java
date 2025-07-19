@@ -1,4 +1,4 @@
-package uz.consortgroup.notification_service.service;
+package uz.consortgroup.notification_service.service.email;
 
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;

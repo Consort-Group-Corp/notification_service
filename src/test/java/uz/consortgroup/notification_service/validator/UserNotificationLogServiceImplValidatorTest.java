@@ -3,7 +3,7 @@ package uz.consortgroup.notification_service.validator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
-import uz.consortgroup.notification_service.entity.enumeration.Language;
+import uz.consortgroup.core.api.v1.dto.user.enumeration.Language;
 import uz.consortgroup.notification_service.event.UserRegisteredEvent;
 
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class UserNotificationServiceValidatorTest {
+class UserNotificationLogServiceImplValidatorTest {
 
     private final UserNotificationServiceValidator validator = new UserNotificationServiceValidator();
 

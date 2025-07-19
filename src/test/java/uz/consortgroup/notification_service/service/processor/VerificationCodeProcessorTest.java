@@ -8,8 +8,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uz.consortgroup.notification_service.entity.enumeration.EventType;
 import uz.consortgroup.notification_service.event.VerificationCodeResentEvent;
-import uz.consortgroup.notification_service.service.EmailDispatcherService;
-import uz.consortgroup.notification_service.service.NotificationService;
+import uz.consortgroup.notification_service.service.email.EmailDispatcherService;
+import uz.consortgroup.notification_service.service.notification.NotificationLogServiceImpl;
 import uz.consortgroup.notification_service.validator.VerificationCodeProcessorValidator;
 
 import java.util.List;
@@ -38,7 +38,7 @@ class VerificationCodeProcessorTest {
     private EmailDispatcherService emailDispatcherService;
 
     @Mock
-    private NotificationService notificationService;
+    private NotificationLogServiceImpl notificationLogServiceImpl;
 
     @Mock
     private VerificationCodeProcessorValidator verificationCodeProcessorValidator;
@@ -62,7 +62,7 @@ class VerificationCodeProcessorTest {
 
         verify(verificationCodeProcessorValidator, times(1)).validateEvents(validEvents);
         verify(emailDispatcherService, times(1)).dispatch(anyList(), eq(Locale.ENGLISH));
-        verify(notificationService, times(1)).createNotification(any(), eq(EventType.VERIFICATION_CODE_SENT));
+        verify(notificationLogServiceImpl, times(1)).createNotification(any(), eq(EventType.VERIFICATION_CODE_SENT));
     }
 
     @Test
@@ -75,7 +75,7 @@ class VerificationCodeProcessorTest {
         assertThrows(IllegalArgumentException.class, () -> processor.process(emptyEvents));
 
         verifyNoInteractions(emailDispatcherService);
-        verifyNoInteractions(notificationService);
+        verifyNoInteractions(notificationLogServiceImpl);
     }
 
     @Test
@@ -90,7 +90,7 @@ class VerificationCodeProcessorTest {
         assertThrows(IllegalArgumentException.class, () -> processor.process(invalidEvents));
 
         verifyNoInteractions(emailDispatcherService);
-        verifyNoInteractions(notificationService);
+        verifyNoInteractions(notificationLogServiceImpl);
     }
 
     @Test

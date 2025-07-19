@@ -5,12 +5,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uz.consortgroup.core.api.v1.dto.user.enumeration.NotificationStatus;
 import uz.consortgroup.notification_service.entity.enumeration.EventType;
-import uz.consortgroup.notification_service.entity.enumeration.NotificationStatus;
 import uz.consortgroup.notification_service.event.EmailContent;
 import uz.consortgroup.notification_service.exception.EmailSendingException;
 import uz.consortgroup.notification_service.message_builder.EmailMessageBuilder;
-import uz.consortgroup.notification_service.service.NotificationService;
+import uz.consortgroup.notification_service.service.notification.NotificationLogServiceImpl;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 class EmailContentValidatorTest {
 
     @Mock
-    private NotificationService notificationService;
+    private NotificationLogServiceImpl notificationLogServiceImpl;
 
     @InjectMocks
     private EmailContentValidator emailContentValidator;
@@ -92,6 +92,6 @@ class EmailContentValidatorTest {
         assertThrows(EmailSendingException.class,
                 () -> emailContentValidator.validateBuilder(content, null, EventType.USER_PROFILE_UPDATED));
 
-        verify(notificationService).updateNotificationsStatus(List.of("test@example.com"), NotificationStatus.FAILED);
+        verify(notificationLogServiceImpl).updateNotificationsStatus(List.of("test@example.com"), NotificationStatus.FAILED);
     }
 }

@@ -5,10 +5,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uz.consortgroup.core.api.v1.dto.user.enumeration.NotificationStatus;
 import uz.consortgroup.notification_service.entity.UserInformation;
 import uz.consortgroup.notification_service.entity.enumeration.EventType;
-import uz.consortgroup.notification_service.entity.enumeration.NotificationStatus;
-import uz.consortgroup.notification_service.repository.NotificationRepository;
+import uz.consortgroup.notification_service.repository.NotificationLogRepository;
+import uz.consortgroup.notification_service.service.notification.NotificationLogServiceImpl;
+import uz.consortgroup.notification_service.service.user.UserInformationServiceImpl;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,16 +22,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class NotificationServiceTest {
+public class NotificationLogServiceImplTest {
 
     @Mock
-    private NotificationRepository notificationRepository;
+    private NotificationLogRepository notificationLogRepository;
 
     @Mock
-    private UserInformationService userInformationService;
+    private UserInformationServiceImpl userInformationServiceImpl;
 
     @InjectMocks
-    private NotificationService notificationService;
+    private NotificationLogServiceImpl notificationLogServiceImpl;
 
 
     @Test
@@ -41,11 +43,11 @@ public class NotificationServiceTest {
         userInformation.setUserId(userId);
         userInformation.setEmail("test@example.com");
 
-        when(userInformationService.findAllByUserIds(List.of(userId))).thenReturn(List.of(userInformation));
+        when(userInformationServiceImpl.findAllByUserIdsInChunks(List.of(userId))).thenReturn(List.of(userInformation));
 
-        notificationService.createNotification(List.of(userId), eventType);
+        notificationLogServiceImpl.createNotification(List.of(userId), eventType);
 
-        verify(notificationRepository).saveAll(anyList());
+        verify(notificationLogRepository).saveAll(anyList());
     }
 
     @Test
@@ -53,11 +55,11 @@ public class NotificationServiceTest {
         UUID userId = UUID.randomUUID();
         EventType eventType = EventType.USER_PROFILE_UPDATED;
 
-        when(userInformationService.findAllByUserIds(List.of(userId))).thenReturn(List.of());
+        when(userInformationServiceImpl.findAllByUserIdsInChunks(List.of(userId))).thenReturn(List.of());
 
-        notificationService.createNotification(List.of(userId), eventType);
+        notificationLogServiceImpl.createNotification(List.of(userId), eventType);
 
-        verify(notificationRepository, never()).saveAll(anyList());
+        verify(notificationLogRepository, never()).saveAll(anyList());
     }
 
 
@@ -67,11 +69,11 @@ public class NotificationServiceTest {
         NotificationStatus status = NotificationStatus.SENT;
 
         UUID userId = UUID.randomUUID();
-        when(userInformationService.findUserIdsByEmails(emails)).thenReturn(List.of(userId));
+        when(userInformationServiceImpl.findUserIdsByEmails(emails)).thenReturn(List.of(userId));
 
-        notificationService.updateNotificationsStatus(emails, status);
+        notificationLogServiceImpl.updateNotificationsStatus(emails, status);
 
-        verify(notificationRepository).updateStatusForUserIds(eq(status), anyList());
+        verify(notificationLogRepository).updateStatusForUserIds(eq(status), anyList());
     }
 
     @Test
@@ -79,10 +81,10 @@ public class NotificationServiceTest {
         List<String> emails = List.of("valid@example.com");
         NotificationStatus status = NotificationStatus.FAILED;
 
-        when(userInformationService.findUserIdsByEmails(emails)).thenReturn(List.of(UUID.randomUUID()));
+        when(userInformationServiceImpl.findUserIdsByEmails(emails)).thenReturn(List.of(UUID.randomUUID()));
 
-        notificationService.updateNotificationsStatus(emails, status);
+        notificationLogServiceImpl.updateNotificationsStatus(emails, status);
 
-        verify(notificationRepository).updateStatusForUserIds(eq(status), anyList());
+        verify(notificationLogRepository).updateStatusForUserIds(eq(status), anyList());
     }
 }

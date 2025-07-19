@@ -1,17 +1,18 @@
-package uz.consortgroup.notification_service.service;
+package uz.consortgroup.notification_service.service.notification;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uz.consortgroup.core.api.v1.dto.user.enumeration.Communication;
+import uz.consortgroup.core.api.v1.dto.user.enumeration.NotificationStatus;
 import uz.consortgroup.notification_service.asspect.annotation.LoggingAspectAfterMethod;
 import uz.consortgroup.notification_service.asspect.annotation.LoggingAspectBeforeMethod;
-import uz.consortgroup.notification_service.entity.Notification;
+import uz.consortgroup.notification_service.entity.NotificationLog;
 import uz.consortgroup.notification_service.entity.UserInformation;
-import uz.consortgroup.notification_service.entity.enumeration.Communication;
 import uz.consortgroup.notification_service.entity.enumeration.EventType;
-import uz.consortgroup.notification_service.entity.enumeration.NotificationStatus;
-import uz.consortgroup.notification_service.repository.NotificationRepository;
+import uz.consortgroup.notification_service.repository.NotificationLogRepository;
+import uz.consortgroup.notification_service.service.user.UserInformationService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,8 +25,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class NotificationService {
-    private final NotificationRepository notificationRepository;
+public class NotificationLogServiceImpl implements NotificationLogService {
+    private final NotificationLogRepository notificationLogRepository;
     private final UserInformationService userInformationService;
 
     @Transactional
@@ -36,18 +37,18 @@ public class NotificationService {
             return;
         }
 
-        Map<UUID, UserInformation> userById = userInformationService.findAllByUserIds(userIds).stream()
+        Map<UUID, UserInformation> userById = userInformationService.findAllByUserIdsInChunks(userIds).stream()
                 .collect(Collectors.toMap(UserInformation::getUserId, Function.identity()));
 
 
-        List<Notification> notifications = userIds.stream()
+        List<NotificationLog> notificationLogs = userIds.stream()
                 .map(id -> {
                     UserInformation user = userById.get(id);
                     if (user == null) {
                         return null;
                     }
 
-                    return Notification.builder()
+                    return NotificationLog.builder()
                             .userInformation(user)
                             .eventType(eventType)
                             .notificationStatus(NotificationStatus.PENDING)
@@ -59,8 +60,8 @@ public class NotificationService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
-        if (!notifications.isEmpty()) {
-            notificationRepository.saveAll(notifications);
+        if (!notificationLogs.isEmpty()) {
+            notificationLogRepository.saveAll(notificationLogs);
         }
     }
 
@@ -69,6 +70,6 @@ public class NotificationService {
     @LoggingAspectAfterMethod
     public void updateNotificationsStatus(List<String> emails, NotificationStatus status) {
         List<UUID> userIdsByEmails = userInformationService.findUserIdsByEmails(emails);
-        notificationRepository.updateStatusForUserIds(status, userIdsByEmails);
+        notificationLogRepository.updateStatusForUserIds(status, userIdsByEmails);
     }
 }

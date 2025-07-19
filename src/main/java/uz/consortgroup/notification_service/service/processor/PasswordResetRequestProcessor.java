@@ -10,8 +10,8 @@ import uz.consortgroup.notification_service.entity.enumeration.EventType;
 import uz.consortgroup.notification_service.event.EmailContent;
 import uz.consortgroup.notification_service.event.EventProcessor;
 import uz.consortgroup.notification_service.event.PasswordResetRequestedEvent;
-import uz.consortgroup.notification_service.service.EmailDispatcherService;
-import uz.consortgroup.notification_service.service.NotificationService;
+import uz.consortgroup.notification_service.service.email.EmailDispatcherService;
+import uz.consortgroup.notification_service.service.notification.NotificationLogService;
 import uz.consortgroup.notification_service.validator.PasswordResetRequestValidator;
 
 import java.util.List;
@@ -21,7 +21,7 @@ import java.util.List;
 @Slf4j
 public class PasswordResetRequestProcessor implements EventProcessor<PasswordResetRequestedEvent> {
     private final EmailDispatcherService emailDispatcherService;
-    private final NotificationService notificationService;
+    private final NotificationLogService notificationLogService;
     private final PasswordResetRequestValidator passwordResetRequestValidator;
 
     @Override
@@ -46,7 +46,7 @@ public class PasswordResetRequestProcessor implements EventProcessor<PasswordRes
 
         emailDispatcherService.dispatch(emailContents, events.get(0).getLocale());
 
-        notificationService.createNotification(events.stream()
+        notificationLogService.createNotification(events.stream()
                 .map(PasswordResetRequestedEvent::getUserId).toList(), EventType.PASSWORD_RESET_REQUESTED);
     }
 }

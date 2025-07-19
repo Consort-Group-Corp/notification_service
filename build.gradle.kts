@@ -13,6 +13,14 @@ java {
     }
 }
 
+extra["springCloudVersion"] = "2024.0.1"
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
+    }
+}
+
 configurations {
     compileOnly {
         extendsFrom(configurations.annotationProcessor.get())
@@ -20,6 +28,7 @@ configurations {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -33,6 +42,9 @@ dependencies {
 
     // Liquibase for database migrations
     implementation("org.liquibase:liquibase-core")
+
+    // core-api-dto
+    implementation("uz.consortgroup:core-api-dto:0.0.1")
 
     // Lombok (compile-time annotations)
     compileOnly("org.projectlombok:lombok")
@@ -55,6 +67,12 @@ dependencies {
     // Apache Kafka
     implementation("org.springframework.kafka:spring-kafka:3.2.0")
 
+    //Google Firebase Cloud Messaging
+    implementation("com.google.firebase:firebase-admin:9.4.0")
+
+    //Feign
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
+    implementation("io.github.openfeign.form:feign-form-spring:3.8.0")
 
     // Тестирование
     testImplementation("org.springframework.boot:spring-boot-starter-test")
