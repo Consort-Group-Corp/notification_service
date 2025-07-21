@@ -1,11 +1,13 @@
 package uz.consortgroup.notification_service.firebase;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import uz.consortgroup.core.api.v1.dto.user.enumeration.Language;
 import uz.consortgroup.core.api.v1.dto.user.response.FcmTokenDto;
+import uz.consortgroup.notification_service.asspect.annotation.AspectAfterThrowing;
+import uz.consortgroup.notification_service.asspect.annotation.LoggingAspectAfterMethod;
+import uz.consortgroup.notification_service.asspect.annotation.LoggingAspectBeforeMethod;
 import uz.consortgroup.notification_service.client.UserDeviceTokenClient;
 import uz.consortgroup.notification_service.entity.NotificationTask;
 import uz.consortgroup.notification_service.entity.NotificationTaskRecipient;
@@ -20,7 +22,6 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class FirebaseNotificationService {
 
     private final UserDeviceTokenClient tokenClient;
@@ -30,6 +31,9 @@ public class FirebaseNotificationService {
 
     private static final int PAGE_SIZE = 100;
 
+    @LoggingAspectBeforeMethod
+    @LoggingAspectAfterMethod
+    @AspectAfterThrowing
     public void sendToAll(NotificationTask task) {
         int page = 0;
 
@@ -48,7 +52,6 @@ public class FirebaseNotificationService {
             Map<UUID, List<FcmTokenDto>> tokenMap = tokenClient.getTokensByUserIds(userIds);
 
             if (tokenMap.values().stream().allMatch(List::isEmpty)) {
-                log.warn("No active tokens found for task {}", task.getId());
                 recipientService.markAllAsFailed(task, "No active FCM tokens found");
                 return;
             }
@@ -66,7 +69,7 @@ public class FirebaseNotificationService {
 
                         fcmSender.send(token.getFcmToken(), translation.getTitle(), translation.getMessage());
                     } catch (Exception e) {
-                        log.error("Failed to send to token {} for user {}: {}", token.getFcmToken(), userId, e.getMessage());
+                        throw new RuntimeException(e);
                     }
                 }
             }
