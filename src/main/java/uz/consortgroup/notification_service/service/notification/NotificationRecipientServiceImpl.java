@@ -48,9 +48,11 @@ public class NotificationRecipientServiceImpl implements NotificationRecipientSe
 
     @Override
     @Transactional
+    @LoggingAspectBeforeMethod
+    @LoggingAspectAfterMethod
     public void markAllAsFailed(NotificationTask task, String errorMessage) {
         int page = 0;
-        int size = 500; // или сколько тебе удобно
+        int size = 500;
         Page<NotificationTaskRecipient> recipientPage;
 
         do {
