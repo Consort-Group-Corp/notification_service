@@ -74,6 +74,8 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("io.github.openfeign.form:feign-form-spring:3.8.0")
 
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+
     // Тестирование
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
