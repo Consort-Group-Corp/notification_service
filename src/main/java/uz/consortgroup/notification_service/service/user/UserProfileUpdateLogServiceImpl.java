@@ -1,10 +1,9 @@
 package uz.consortgroup.notification_service.service.user;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uz.consortgroup.notification_service.asspect.annotation.LoggingAspectAfterMethod;
-import uz.consortgroup.notification_service.asspect.annotation.LoggingAspectBeforeMethod;
 import uz.consortgroup.notification_service.entity.UserInformation;
 import uz.consortgroup.notification_service.entity.UserProfileUpdateLog;
 import uz.consortgroup.notification_service.entity.enumeration.EventType;
@@ -20,22 +19,25 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserProfileUpdateLogServiceImpl implements UserProfileUpdateLogService {
+
     private final UserProfileUpdateLogRepository userProfileUpdateLogRepository;
     private final UserInformationService userInformationService;
 
     @Transactional
-    @LoggingAspectBeforeMethod
-    @LoggingAspectAfterMethod
-    public void logUserProfileUpdate(List<UUID> userIds,EventType eventType) {
+    @Override
+    public void logUserProfileUpdate(List<UUID> userIds, EventType eventType) {
+        log.info("Logging profile update for {} users with event type {}", userIds.size(), eventType);
+
         Map<UUID, UserInformation> userById = userInformationService.findAllByUserIdsInChunks(userIds).stream()
                 .collect(Collectors.toMap(UserInformation::getUserId, Function.identity()));
 
         List<UserProfileUpdateLog> logs = userIds.stream()
                 .map(id -> {
                     UserInformation user = userById.get(id);
-
                     if (user == null) {
+                        log.warn("User not found for id {}", id);
                         return null;
                     }
 
@@ -51,6 +53,9 @@ public class UserProfileUpdateLogServiceImpl implements UserProfileUpdateLogServ
 
         if (!logs.isEmpty()) {
             userProfileUpdateLogRepository.saveAll(logs);
+            log.info("Saved {} user profile update logs", logs.size());
+        } else {
+            log.info("No profile update logs were saved because no users matched");
         }
     }
 }

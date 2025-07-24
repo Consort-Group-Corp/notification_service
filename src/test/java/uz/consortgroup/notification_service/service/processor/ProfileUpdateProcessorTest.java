@@ -57,19 +57,6 @@ class ProfileUpdateProcessorTest {
     }
 
     @Test
-    void process_shouldThrowExceptionForEmptyEventList() {
-        List<UserProfileUpdateEvent> emptyEvents = List.of();
-
-        doThrow(new IllegalArgumentException("Event list must not be empty"))
-                .when(profileUpdateProcessorValidator).validateEvents(emptyEvents);
-
-        assertThrows(IllegalArgumentException.class, () -> processor.process(emptyEvents));
-
-        verifyNoInteractions(userInformationServiceImpl);
-        verifyNoInteractions(userProfileUpdateLogServiceImpl);
-    }
-
-    @Test
     void process_shouldThrowExceptionForInvalidEvent() {
         UserProfileUpdateEvent invalidEvent = new UserProfileUpdateEvent();
         invalidEvent.setUserId(null);

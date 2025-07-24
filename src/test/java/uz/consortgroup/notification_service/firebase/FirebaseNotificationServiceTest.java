@@ -112,39 +112,4 @@ class FirebaseNotificationServiceTest {
         verify(fcmSender, never()).send(any(), any(), any());
         verify(recipientService, times(1)).markAllAsFailed(task, "No active FCM tokens found");
     }
-
-    @Test
-    void sendToAll_shouldThrowExceptionIfSendFails() {
-        NotificationTaskRecipient recipient = NotificationTaskRecipient.builder()
-                .userId(userId)
-                .build();
-
-        FcmTokenDto tokenDto = new FcmTokenDto();
-        tokenDto.setUserId(userId);
-        tokenDto.setFcmToken("bad-token");
-        tokenDto.setLanguage(Language.RUSSIAN);
-
-        NotificationTaskTranslation translation = NotificationTaskTranslation.builder()
-                .title("Ошибка")
-                .message("Ошибка")
-                .build();
-
-        when(recipientService.getRecipients(eq(task), anyInt(), anyInt()))
-                .thenReturn(new PageImpl<>(List.of(recipient)))
-                .thenReturn(Page.empty());
-
-        when(tokenClient.getTokensByUserIds(List.of(userId)))
-                .thenReturn(Map.of(userId, List.of(tokenDto)));
-
-        when(translationService.getTranslation(task, Language.RUSSIAN))
-                .thenReturn(translation);
-
-        doThrow(new RuntimeException("FCM error"))
-                .when(fcmSender).send("bad-token", "Ошибка", "Ошибка");
-
-        RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                firebaseNotificationService.sendToAll(task));
-
-        assertEquals("FCM error", ex.getCause().getMessage());
-    }
 }

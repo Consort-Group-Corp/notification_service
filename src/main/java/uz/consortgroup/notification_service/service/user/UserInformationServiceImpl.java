@@ -1,13 +1,10 @@
 package uz.consortgroup.notification_service.service.user;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import uz.consortgroup.notification_service.asspect.annotation.AspectAfterReturning;
-import uz.consortgroup.notification_service.asspect.annotation.AspectAfterThrowing;
-import uz.consortgroup.notification_service.asspect.annotation.LoggingAspectAfterMethod;
-import uz.consortgroup.notification_service.asspect.annotation.LoggingAspectBeforeMethod;
 import uz.consortgroup.notification_service.entity.UserInformation;
 import uz.consortgroup.notification_service.event.UserProfileUpdateEvent;
 import uz.consortgroup.notification_service.event.UserRegisteredEvent;
@@ -19,38 +16,36 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserInformationServiceImpl implements UserInformationService {
     private final UserInformationRepository userInformationRepository;
     private final UserNotificationServiceValidator userNotificationServiceValidator;
 
-    @Transactional
-    @LoggingAspectBeforeMethod
-    @LoggingAspectAfterMethod
-    @AspectAfterThrowing
     @Override
-    public void saveUserBaseInfo(List<UserRegisteredEvent> event) {
-        userNotificationServiceValidator.validateUserRegistrationEvent(event);
+    @Transactional
+    public void saveUserBaseInfo(List<UserRegisteredEvent> events) {
+        log.info("Start saving user base info for {} users", events.size());
+        userNotificationServiceValidator.validateUserRegistrationEvent(events);
 
-        List<UserInformation> notifications = event.stream()
-                .map(userRegisteredEvent -> UserInformation.builder()
-                        .userId(userRegisteredEvent.getUserId())
-                        .language(userRegisteredEvent.getLanguage())
-                        .email(userRegisteredEvent.getEmail())
+        List<UserInformation> notifications = events.stream()
+                .map(event -> UserInformation.builder()
+                        .userId(event.getUserId())
+                        .language(event.getLanguage())
+                        .email(event.getEmail())
                         .build())
                 .collect(Collectors.toList());
 
         userInformationRepository.saveAll(notifications);
+        log.info("Successfully saved base user info for {} users", notifications.size());
     }
 
-    @LoggingAspectBeforeMethod
-    @LoggingAspectAfterMethod
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveUserFullInfo(List<UserProfileUpdateEvent> events) {
-        events.forEach(event -> {
+        log.info("Start saving full user info for {} events", events.size());
+        for (UserProfileUpdateEvent event : events) {
             userInformationRepository.updateUserInfoAndReturn(
                     event.getUserId(),
                     event.getLastName(),
@@ -59,35 +54,35 @@ public class UserInformationServiceImpl implements UserInformationService {
                     event.getBornDate(),
                     event.getPhoneNumber()
             );
-        });
+            log.debug("Updated info for user: {}", event.getUserId());
+        }
+        log.info("Completed updating full user info");
     }
 
-    @Transactional
-    @LoggingAspectBeforeMethod
-    @LoggingAspectAfterMethod
-    @AspectAfterThrowing
-    @AspectAfterReturning
     @Override
+    @Transactional
     public List<UUID> findUserIdsByEmails(List<String> emails) {
-        return userInformationRepository.findUserIdsByEmails(emails);
+        log.info("Finding userIds by {} emails", emails.size());
+        List<UUID> userIds = userInformationRepository.findUserIdsByEmails(emails);
+        log.debug("Found {} userIds", userIds.size());
+        return userIds;
     }
 
-    @LoggingAspectBeforeMethod
-    @LoggingAspectAfterMethod
-    @AspectAfterThrowing
-    @AspectAfterReturning
     @Override
     public List<UserInformation> findAllByUserIdsInChunks(List<UUID> userIds) {
+        log.info("Fetching user info for {} userIds in chunks", userIds.size());
+
         int chunkSize = 500;
         List<UserInformation> result = new ArrayList<>();
 
         for (int i = 0; i < userIds.size(); i += chunkSize) {
             List<UUID> chunk = userIds.subList(i, Math.min(i + chunkSize, userIds.size()));
-            result.addAll(userInformationRepository.findAllByUserIds(chunk));
+            List<UserInformation> users = userInformationRepository.findAllByUserIds(chunk);
+            result.addAll(users);
+            log.debug("Fetched {} users for chunk [{}-{})", users.size(), i, i + chunkSize);
         }
 
+        log.info("Completed fetching user info. Total records: {}", result.size());
         return result;
     }
 }
-
-
