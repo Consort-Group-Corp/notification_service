@@ -21,7 +21,7 @@ public class NotificationSendScheduler {
     private final NotificationTaskRecipientUpdateService recipientUpdateService;
     private final FirebaseNotificationService firebaseNotificationService;
 
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0/5 * * * * *")
     public void processScheduled() {
         List<NotificationTask> tasks = notificationTaskService.findScheduledTasks();
 
