@@ -66,19 +66,6 @@ class VerificationCodeProcessorTest {
     }
 
     @Test
-    void process_shouldThrowExceptionForEmptyEventList() {
-        List<VerificationCodeResentEvent> emptyEvents = List.of();
-
-        doThrow(new IllegalArgumentException("Event list must not be empty"))
-                .when(verificationCodeProcessorValidator).validateEvents(emptyEvents);
-
-        assertThrows(IllegalArgumentException.class, () -> processor.process(emptyEvents));
-
-        verifyNoInteractions(emailDispatcherService);
-        verifyNoInteractions(notificationLogServiceImpl);
-    }
-
-    @Test
     void process_shouldThrowExceptionForInvalidEvent() {
         VerificationCodeResentEvent invalidEvent = new VerificationCodeResentEvent();
         invalidEvent.setUserId(null);

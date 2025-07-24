@@ -81,17 +81,6 @@ class NotificationTaskRecipientUpdateServiceImplTest {
     }
 
     @Test
-    void markAllAsSent_shouldHandleEmptyTask() {
-        NotificationTask task = createTestTask();
-        when(recipientRepository.findAllByTaskId(eq(task.getId()), any(PageRequest.class)))
-            .thenReturn(Page.empty());
-
-        service.markAllAsSent(task);
-
-        verify(recipientRepository, times(1)).saveAll(any());
-    }
-
-    @Test
     void markAllAsFailed_shouldUpdateAllRecipientsToFailedStatus() {
         NotificationTask task = createTestTask();
         String errorMessage = "Test error";

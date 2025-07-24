@@ -5,17 +5,15 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import uz.consortgroup.notification_service.asspect.annotation.AspectAfterReturning;
-import uz.consortgroup.notification_service.asspect.annotation.AspectAfterThrowing;
-import uz.consortgroup.notification_service.asspect.annotation.LoggingAspectAfterMethod;
-import uz.consortgroup.notification_service.asspect.annotation.LoggingAspectBeforeMethod;
 
 import java.security.Key;
 import java.util.Date;
 
 @Component
+@Slf4j
 public class JwtTokenProvider {
 
     @Value("${security.token}")
@@ -28,54 +26,58 @@ public class JwtTokenProvider {
 
     @PostConstruct
     public void init() {
-        secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jetSecret));
-        System.out.println(secretKey);
+        try {
+            secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jetSecret));
+            log.info("JWT secret key initialized");
+        } catch (Exception e) {
+            log.error("Failed to initialize JWT secret key", e);
+        }
     }
 
-    @LoggingAspectBeforeMethod
-    @LoggingAspectAfterMethod
-    @AspectAfterThrowing
     public boolean validateToken(String token) {
+        log.debug("Validating JWT token");
         try {
-            Claims claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
             return !isTokenExpired(claims);
         } catch (Exception e) {
-
+            log.warn("Invalid JWT token: {}", e.getMessage());
             return false;
         }
     }
 
-    @LoggingAspectBeforeMethod
-    @LoggingAspectAfterMethod
-    @AspectAfterThrowing
     private boolean isTokenExpired(Claims claims) {
         Date expirationDate = claims.getExpiration();
-        return expirationDate == null || expirationDate.before(new Date());
+        boolean expired = expirationDate == null || expirationDate.before(new Date());
+        log.debug("Token expired: {}", expired);
+        return expired;
     }
 
-    @LoggingAspectBeforeMethod
-    @LoggingAspectAfterMethod
-    @AspectAfterThrowing
-    @AspectAfterReturning
-    public String  getUserNameFromJwtToken(String token) {
-        Claims claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
+    public String getUserNameFromJwtToken(String token) {
+        log.debug("Extracting username from JWT token");
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
         return claims.getSubject();
     }
 
-    @LoggingAspectBeforeMethod
-    @LoggingAspectAfterMethod
-    @AspectAfterThrowing
-    @AspectAfterReturning
     public Date getExpirationDateFromToken(String token) {
-        Claims claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
+        log.debug("Extracting expiration date from JWT token");
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
         return claims.getExpiration();
     }
 
-    @LoggingAspectBeforeMethod
-    @LoggingAspectAfterMethod
-    @AspectAfterThrowing
-    @AspectAfterReturning
     public String generateToken(String username) {
+        log.debug("Generating token for user: {}", username);
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jetExpirationMs);
 

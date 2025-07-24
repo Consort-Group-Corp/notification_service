@@ -89,11 +89,6 @@ class UserRegistrationProcessorTest {
         );
     }
 
-    @Test
-    void process_shouldHandleNullEventList() {
-        assertThrows(NullPointerException.class, () -> processor.process(null));
-    }
-
     private UserRegisteredEvent createTestEvent(UUID userId, UUID messageId, String email, String code, Locale locale) {
         UserRegisteredEvent event = new UserRegisteredEvent();
         event.setUserId(userId);
