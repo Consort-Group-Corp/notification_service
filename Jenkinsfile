@@ -12,8 +12,8 @@ pipeline {
   }
 
   environment {
-    SERVICE_NAME   = 'user-service'
-    CONTAINER_NAME = 'consort-user-service'
+    SERVICE_NAME   = 'notification-service'
+    CONTAINER_NAME = 'consort-notification-service'
     DOCKER_NETWORK = 'consort-infra_consort-network'
     LOGS_DIR       = '/app/logs/notification-service'
     ENV_FILE       = '/var/jenkins_home/.env'
@@ -102,7 +102,7 @@ pipeline {
             --network ${DOCKER_NETWORK} \
             --restart unless-stopped \
             -p ${APP_PORT}:${APP_PORT} \
-            -v ${LOGS_DIR}:/app/logs/user-service \
+            -v ${LOGS_DIR}:/app/logs/notification-service \
             --env-file ${ENV_FILE} \
             -e TZ=Asia/Tashkent \
             -e SPRING_PROFILES_ACTIVE=dev \
@@ -110,7 +110,7 @@ pipeline {
             -e SPRING_DATASOURCE_URL=jdbc:postgresql://consort-postgres:5432/${POSTGRES_DB} \
             -e SPRING_DATASOURCE_USERNAME=${POSTGRES_USER} \
             -e SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD} \
-            -e SPRING_DATA_REDIS_HOST=consort-redis-user-service \
+            -e SPRING_DATA_REDIS_HOST=consort-redis-notification-service \
             -e SPRING_DATA_REDIS_PORT=6379 \
             -e SPRING_KAFKA_BOOTSTRAP_SERVERS=consort-kafka:9092 \
             -e EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://consort-eureka-service:8762/eureka/ \
