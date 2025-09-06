@@ -87,3 +87,7 @@ mail:
 user:
   service:
     url: http://localhost:8081
+
+firebase:
+  enabled: ${FIREBASE_ENABLED:false}
+  credentials: ${FIREBASE_CREDENTIALS:}
