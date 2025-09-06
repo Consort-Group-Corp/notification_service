@@ -7,14 +7,12 @@ spring:
 
   application:
     name: notification-service
-  messages:
-    encoding: utf-8
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://db:5432/consort_group
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:consort-postgres}:${DB_PORT:5432}/${POSTGRES_DB:consort_group}}
+    username: ${DB_USERNAME:${POSTGRES_USER:consort}}
+    password: ${DB_PASSWORD:${POSTGRES_PASSWORD:consort}}
     hikari:
       maximum-pool-size: 10
 
@@ -23,18 +21,49 @@ spring:
       ddl-auto: update
     show-sql: false
     properties:
-      hibernate:
-        format_sql: true
-        jdbc:
-          batch_versioned_data: true
+      hibernate.format_sql: true
+      hibernate.jdbc.batch_versioned_data: true
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
   data:
     redis:
-      host: consort-redis-notification-service
-      port: 6379
+      host: ${REDIS_NOTIFICATION_HOST:consort-redis-notification-service}
+      port: ${REDIS_NOTIFICATION_PORT:6379}
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+        shutdown-timeout: 100ms
+
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:consort-kafka:9092}
+    consumer:
+      group-id: ${SPRING_KAFKA_CONSUMER_GROUP_ID:notification-service-group}
+      auto-offset-reset: latest
+      max-poll-records: ${SPRING_KAFKA_CONSUMER_MAX_POLL_RECORDS:500}
+      properties:
+        session.timeout.ms: ${SPRING_KAFKA_CONSUMER_SESSION_TIMEOUT_MS:10000}
+        heartbeat.interval.ms: ${SPRING_KAFKA_CONSUMER_HEARTBEAT_INTERVAL_MS:3000}
+        max.partition.fetch.bytes: ${SPRING_KAFKA_CONSUMER_MAX_PARTITION_FETCH_BYTES:1048576}
+        max.poll.interval.ms: ${SPRING_KAFKA_CONSUMER_MAX_POLL_INTERVAL_MS:300000}
+    producer:
+      acks: all
+      retries: 10
+    properties:
+      metadata.max.age.ms: 30000
+
+kafka:
+  bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:consort-kafka:9092}
+  consumer-group-id: ${SPRING_KAFKA_CONSUMER_GROUP_ID:notification-service-group}
+  session-timeout-ms: ${SPRING_KAFKA_CONSUMER_SESSION_TIMEOUT_MS:10000}
+  max-partition-fetch-bytes: ${SPRING_KAFKA_CONSUMER_MAX_PARTITION_FETCH_BYTES:1048576}
+  max-poll-records: ${SPRING_KAFKA_CONSUMER_MAX_POLL_RECORDS:500}
+  max-poll-interval-ms: ${SPRING_KAFKA_CONSUMER_MAX_POLL_INTERVAL_MS:300000}
 
 logging:
   level:
@@ -43,21 +72,46 @@ logging:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
-kafka:
-  bootstrap-servers: kafka:9092
-  consumer-group-id: email-group
-  session-timeout-ms: 10000
-  max-partition-fetch-bytes: 1048576
-  max-poll-records: 500
-  max-poll-interval-ms: 300000
+topics:
   user-registration: user-registered-topic
   user-update-profile: user-update-profile-topic
   verification-code-resent: verification-code-resent-topic
   password-reset-request: password-reset-request-topic
 
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://consort-eureka-service:8762/eureka/}
+  instance:
+    prefer-ip-address: true
+    instance-id: ${HOSTNAME}:${server.port}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+      show-components: when_authorized
+  health:
+    redis:
+      enabled: false
+    db:
+      enabled: true
+    defaults:
+      enabled: true
+    diskspace:
+      enabled: true
+    ping:
+      enabled: true
+
 security:
   token: ${SECURITY_TOKEN}
-  expiration: 3600000
+  expiration: ${JWT_EXPIRATION_MS:3600000}
 
 async:
   core-pool-size: 5
@@ -67,9 +121,10 @@ async:
 
 notification:
   email:
-    chunk-size: 1000
-    max-concurrent-emails: 100
+    chunk-size: ${NOTIF_EMAIL_CHUNK_SIZE:1000}
+    max-concurrent-emails: ${NOTIF_EMAIL_MAX_CONCURRENCY:100}
 
+# <- почта как была
 mail:
   host: smtp.gmail.com
   port: 587
@@ -85,4 +140,4 @@ mail:
 
 user:
   service:
-    url: http://consort-user-service:8081
+    url: ${USER_SERVICE_URL:http://consort-user-service:8081}
