@@ -124,6 +124,10 @@ notification:
     chunk-size: ${NOTIF_EMAIL_CHUNK_SIZE:1000}
     max-concurrent-emails: ${NOTIF_EMAIL_MAX_CONCURRENCY:100}
 
+firebase:
+  enabled: ${FIREBASE_ENABLED:false}
+  credentials: ${FIREBASE_CREDENTIALS:}
+
 mail:
   host: smtp.gmail.com
   port: 587
