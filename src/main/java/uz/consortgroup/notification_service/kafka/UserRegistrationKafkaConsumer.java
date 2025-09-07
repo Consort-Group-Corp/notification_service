@@ -25,7 +25,7 @@ public class UserRegistrationKafkaConsumer extends AbstractKafkaConsumer<UserReg
     }
 
     @KafkaListener(
-            topics = "${kafka.user-registration}",
+            topics = "${topics.user-registration}",
             groupId = "${kafka.consumer-group-id}",
             containerFactory = "universalKafkaListenerContainerFactory"
     )

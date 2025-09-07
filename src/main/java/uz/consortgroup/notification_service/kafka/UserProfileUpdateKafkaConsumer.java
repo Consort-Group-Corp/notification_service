@@ -24,7 +24,7 @@ public class UserProfileUpdateKafkaConsumer extends AbstractKafkaConsumer<UserPr
     }
 
     @KafkaListener(
-            topics = "${kafka.user-update-profile}",
+            topics = "${topics.user-update-profile}",
             groupId = "${kafka.consumer-group-id}",
             containerFactory = "universalKafkaListenerContainerFactory"
     )

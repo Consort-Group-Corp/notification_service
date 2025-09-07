@@ -27,8 +27,10 @@ public class PasswordResetKafkaConsumer extends AbstractKafkaConsumer<PasswordRe
         this.process = processor;
     }
 
+
+
     @KafkaListener(
-            topics = "${kafka.password-reset-request}",
+            topics = "${topics.password-reset-request}",
             groupId = "${kafka.consumer-group-id}",
             containerFactory = "universalKafkaListenerContainerFactory"
     )
