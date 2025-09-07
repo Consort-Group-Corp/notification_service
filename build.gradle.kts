@@ -33,6 +33,22 @@ repositories {
 }
 
 dependencies {
+
+    // Gmail API
+    implementation("com.google.api-client:google-api-client:2.5.0")
+    implementation("com.google.apis:google-api-services-gmail:v1-rev20240506-2.0.0")
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.27.0")
+
+    // Аутентификация через OAuth2 (HttpCredentialsAdapter)
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.27.0")
+    implementation("com.google.apis:google-api-services-gmail:v1-rev20250630-2.0.0")
+
+    implementation("com.google.http-client:google-http-client-gson:1.44.1")
+
+
+    implementation("org.springframework.boot:spring-boot-starter-mail")
+
+
     //Spring Boot Mail
     implementation ("org.springframework.boot:spring-boot-starter-mail")
 
