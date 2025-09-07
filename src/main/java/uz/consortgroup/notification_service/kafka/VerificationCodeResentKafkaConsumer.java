@@ -24,7 +24,7 @@ public class VerificationCodeResentKafkaConsumer extends AbstractKafkaConsumer<V
     }
 
     @KafkaListener(
-            topics = "${kafka.verification-code-resent}",
+            topics = "${topics.verification-code-resent}",
             groupId = "${kafka.consumer-group-id}",
             containerFactory = "universalKafkaListenerContainerFactory"
     )
