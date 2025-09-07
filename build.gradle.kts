@@ -53,6 +53,9 @@ dependencies {
     //Google Guava
     implementation ("com.google.guava:guava:32.1.2-jre")
 
+    //Eureka
+    implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
+
     //JWT
     implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
