@@ -131,8 +131,8 @@ firebase:
 mail:
   host: smtp.gmail.com
   port: 587
-  username: doniyor.kurbanov.21@gmail.com
-  password: eeqm amxf ejqc dahi
+  username: "doniyor.kurbanov.21@gmail.com"
+  password: "eeqm amxf ejqc dahi"
   properties:
     mail:
       smtp:
